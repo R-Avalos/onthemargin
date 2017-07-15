@@ -1,4 +1,12 @@
 # Shiny Dashboard App
+
+# Potential data sources:
+# github, cryptocurrency, f1 racing, SFMoMA
+
+
+
+
+
 library('shinydashboard')
 library('shiny')
 

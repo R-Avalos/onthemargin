@@ -1,7 +1,7 @@
 # Cryptocurrency Price API Calls
 # https://www.cryptocompare.com/api/
 
-library('httr')
+library(httr)
 library(tidyjson)
 library(jsonlite)
 library(dplyr)
@@ -31,11 +31,33 @@ content(Test2)
 x <- httr::content(Test2, type = "text", encoding = "UTF-8")
 head(x)
 
+###
+tidy_test <- x
+
+tidy_test %>%
+        gather_keys()
+
+y <- tidy_test %>%
+        enter_object('MiningData') %>%
+        gather_keys()
+
+z <- tidy_test %>%
+        enter_object('MiningData') %>%
+        enter_object('15760') %>%
+        spread_values(id = jstring('Id'),
+                      company = jstring('Company'),
+                      name = jstring('Name'),
+                      algorithm = jstring('Algorithm'),
+                      hashes_per_sec = jstring('HashesPerSecond'),
+                      cost = jstring('Cost'),
+                      equipment = jstring('EquipmentType'),
+                      coin = jstring('CurrenciesAvailable')
+                      )
+
+
 # Tidyjson work
 tidy_test %>% prettify  # get a look at the data
+tidy_test %>% minify
 tidy_test %>% gather_keys %>% json_types() %>% json_lengths() # overview of structure
 #tidy_test %>% gather_keys %>% json_types() %>% group_by(key, type) %>% tally
 
-y <- tidy_test %>%
-        spread_values(MiningD = jstring('MiningData')) %>%
-        gather_keys()

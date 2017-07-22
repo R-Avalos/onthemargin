@@ -26,20 +26,15 @@ ui <- dashboardPage(
         dashboardBody(
                 # Github tab
                 tabItem(tabName = "Github",
-                        fluidRow(column(width = 6, 
-                                         box(plotOutput("testPlot", height = 250)),
-                                         box(title = "testPlot Controls",
-                                             sliderInput("slider", "Obs Count:", 1, 100, 50)
-                                             )
-                                        )
+                        fluidRow(box(plotOutput("testPlot", height = 250)),
+                                 box(plotOutput("testPlot2", height = 250))
                                  ),
-                        fluidRow(column(width = 6,
-                                        box(plotOutput("testPlot2", height = 250)),
-                                        box(
-                                                title = "tesPlot2 Controls",
-                                                sliderInput("slider2", "Count", 1, 500, 100)
-                                                )
-                                        )
+                        fluidRow(box(title = "tesPlot2 Controls",
+                                     sliderInput("slider2", "Count", 1, 500, 100)
+                                     ),
+                                 box(title = "testPlot Controls",
+                                     sliderInput("slider", "Obs Count:", 1, 100, 50)
+                                     )                                
                                  )
                         )
                 )

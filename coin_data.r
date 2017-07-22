@@ -60,7 +60,44 @@ y2 <- tidy_test %>%
                       coin = jstring('CurrenciesAvailable')
         )
 
-#### There are 62 keys!!!!  
+#### There are 62 keys!!!!
+# For each key, create dataframe of sub data
+# Add dataframe to list, combine all data frames into one, and return
+mining_pull <- function(json_content = 'MiningData'){
+        
+        api_data <- httr::GET('https://www.cryptocompare.com/api/data/miningequipment/')
+        x <- httr::content(api_data, type = "text", encoding = "UTF-8")
+        
+        mining_list <- list() #creat empty list for data frames
+        #get list of keys
+        key_df <- x %>%
+                enter_object(json_content) %>%
+                gather_keys()
+        key_count <- length(key_df$key) #count of keys
+        #for each key, create a dataframe
+        for(i in 1:key_count) {
+                z <- x %>%
+                        enter_object(json_content) %>%
+                        enter_object(key_df[i, 2]) %>%
+                        spread_values(id = jstring('Id'),
+                                      company = jstring('Company'),
+                                      name = jstring('Name'),
+                                      algorithm = jstring('Algorithm'),
+                                      hashes_per_sec = jstring('HashesPerSecond'),
+                                      cost = jstring('Cost'),
+                                      equipment = jstring('EquipmentType'),
+                                      coin = jstring('CurrenciesAvailable')
+                        )
+                z$i <- i #add count
+                mining_list[[i]] <- z
+                remove(z)
+                remove(i)
+        }
+        mining_df <- do.call(rbind, mining_list) #combine list to single data frame
+        return(mining_df) # return
+}
+
+
 tidy_test %>% as.tbl_json() %>%
         enter_object('MiningData') %>%
         gather_keys()
@@ -69,9 +106,9 @@ tidy_test2 <- tidy_test %>% as.tbl_json() %>%
         enter_object('MiningData')
 tidy_test2 %>% gather_keys()
 tidy_test2 %>% 
-        spread_values(id = jstring('Id'))
+        spread_values(id = jstring(''))
 
-#### Okay, for each keys .. e.g '35204', "16080" in the list... save to data frame and then stack the data frames... fun stuff
+#### Okay, for each keys .. e.g '35204', "16080" in the list... save to data frame and then stack the data frames... fun stuff... the json wasn't structure correctly :/
 
 
 ## 

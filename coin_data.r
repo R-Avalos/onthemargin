@@ -5,6 +5,8 @@ library(httr)
 library(tidyjson)
 library(jsonlite)
 library(dplyr)
+library(ggplot2)
+library(ggvis)
 
 # coin <- GET('https://min-api.cryptocompare.com')
 
@@ -46,7 +48,31 @@ mining_pull <- function(json_content = 'MiningData'){
 }
 
 test <- mining_pull()
+test$cost <- as.numeric(test$cost)
 
+ggplot(test, aes(x = coin, y = cost)) +
+        geom_jitter(width = 0.1, height = 0, alpha = 0.25)
+
+## Plot
+test %>%
+        ggvis(~ company, ~ cost) %>%
+        layer_points(fill = ~factor(coin), fillOpacity := 0.75) %>%
+        add_axis("y", orient = "left", 
+                 title = "Mining Cost",
+                 title_offset = 50) %>%
+        add_axis("x", title = "Company",
+                 properties = axis_props(labels = list(angle = 45, 
+                                                       align = "left")
+                 ),
+                 title_offset = 100) %>%
+        add_axis("x", orient = "top", 
+                 ticks = 0, 
+                 title = "Plot Title",
+                 properties = axis_props(
+                         axis = list(stroke = "white"),
+                         labels = list(fontSize = 0)
+                         )
+                 )
 
 
 #########################

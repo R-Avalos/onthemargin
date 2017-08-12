@@ -9,9 +9,9 @@
 
 # infoBox() for small amounts of info
 # valueBox() for small amounts of info
-
 library('shinydashboard')
 library('shiny')
+source("coin_data.r")
 
 ui <- dashboardPage(
         dashboardHeader(title = "Randy Avalos"),
@@ -27,14 +27,23 @@ ui <- dashboardPage(
                 # Github tab
                 tabItem(tabName = "Github",
                         fluidRow(box(plotOutput("testPlot", height = 250)),
-                                 box(plotOutput("testPlot2", height = 250))
-                                 ),
-                        fluidRow(box(title = "tesPlot2 Controls",
+                                 box(plotOutput("testPlot2", height = 250)),
+                                 box(title = "tesPlot2 Controls",
                                      sliderInput("slider2", "Count", 1, 500, 100)
                                      ),
                                  box(title = "testPlot Controls",
                                      sliderInput("slider", "Obs Count:", 1, 100, 50)
-                                     )                                
+                                     )    
+                                 
+                                 ),
+                        fluidRow(infoBox("Ethereum", 
+                                         paste0("$", prettyNum(content(ethereum_price)$data$amount, big.mark = ",")
+                                                )
+                                         ),
+                                 infoBox("Bitcoin", 
+                                         paste0("$", prettyNum(content(bitcoin_price)$data$amount, big.mark = ",")
+                                                )
+                                         )
                                  )
                         )
                 )

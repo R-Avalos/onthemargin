@@ -12,11 +12,17 @@ library(ggvis)
 
 #Coinbase API
 bitcoin_price <- GET("https://api.coinbase.com/v2/prices/BTC-USD/spot")
-content(bitcoin_price)
-bitcoin_price$date
+# content(bitcoin_price)
+# bitcoin_price$date
 ethereum_price <- GET("https://api.coinbase.com/v2/prices/ETH-USD/spot")
-paste0("$", content(ethereum_price)$data$amount)
+paste0("ETH ", "$", content(ethereum_price)$data$amount)
 
+test <- GET("https://api.gdax.com/products/ETH-USD/stats")
+test <- GET("https://api.gdax.com/products/ETH-USD/candles", query = list(granularity = 86400)) # granualarity is listed by seconds, 8640 = 1 day, https://docs.gdax.com/?python#get-historic-rates
+
+test_df <- content(test)
+
+# dfs <- lapply(test_df2, data.frame, stringsAsFactors = FALSE)
 
 
 # ##########

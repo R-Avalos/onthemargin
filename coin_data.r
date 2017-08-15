@@ -7,8 +7,7 @@ library(jsonlite)
 library(dplyr)
 library(ggplot2)
 library(ggvis)
-
-
+library(lubridate)
 
 #Coinbase API
 bitcoin_price <- GET("https://api.coinbase.com/v2/prices/BTC-USD/spot")
@@ -20,10 +19,20 @@ paste0("ETH ", "$", content(ethereum_price)$data$amount)
 test <- GET("https://api.gdax.com/products/ETH-USD/stats")
 test <- GET("https://api.gdax.com/products/ETH-USD/candles", query = list(granularity = 86400)) # granualarity is listed by seconds, 8640 = 1 day, https://docs.gdax.com/?python#get-historic-rates
 
-test_df <- content(test)
-
-# dfs <- lapply(test_df2, data.frame, stringsAsFactors = FALSE)
-
+eth_daily_list <- content(test) # place contents into lists of lists
+eth_price_history <- data.frame(matrix(unlist(eth_daily_list), 
+                        nrow=length(eth_daily_list), 
+                        byrow=T),
+                 stringsAsFactors=FALSE) # unlist list of lists into data frame
+eth_price_history <- rename(eth_price_history,
+                            "time" = X1,
+                            "low" = X2,
+                            "high" = X3,
+                            "open" = X4,
+                            "close" = X5,
+                            "volume" = X6
+                            )
+eth_price_history$time <- as_datetime(eth_price_history$time) # convert epoch to human readible datetime
 
 # ##########
 # # coin <- GET('https://min-api.cryptocompare.com')

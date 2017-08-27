@@ -34,6 +34,19 @@ eth_price_history <- rename(eth_price_history,
                             )
 eth_price_history$time <- as_datetime(eth_price_history$time) # convert epoch to human readible datetime
 
+# Plot of ethereum
+eth_price_history %>%
+        ggvis(x = ~time, y = ~close, 
+              fill = ~volume, 
+              opacity := 0.5) %>%
+        layer_points() %>%
+        add_tooltip(function(df) paste0("$", df$close)) #closing price plot
+
+eth_price_history %>%
+        ggvis(x = ~time, y = ~volume, y2 = ~0, 
+              fill := "black") %>%
+        layer_ribbons() # volume plot
+
 # ##########
 # # coin <- GET('https://min-api.cryptocompare.com')
 # 

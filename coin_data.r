@@ -14,7 +14,7 @@ bitcoin_price <- GET("https://api.coinbase.com/v2/prices/BTC-USD/spot")
 # content(bitcoin_price)
 # bitcoin_price$date
 ethereum_price <- GET("https://api.coinbase.com/v2/prices/ETH-USD/spot")
-paste0("ETH ", "$", content(ethereum_price)$data$amount)
+# paste0("ETH ", "$", content(ethereum_price)$data$amount)
 
 test <- GET("https://api.gdax.com/products/ETH-USD/stats")
 test <- GET("https://api.gdax.com/products/ETH-USD/candles", query = list(granularity = 86400)) # granualarity is listed by seconds, 8640 = 1 day, https://docs.gdax.com/?python#get-historic-rates
@@ -35,17 +35,24 @@ eth_price_history <- rename(eth_price_history,
 eth_price_history$time <- as_datetime(eth_price_history$time) # convert epoch to human readible datetime
 
 # Plot of ethereum
-eth_price_history %>%
-        ggvis(x = ~time, y = ~close, 
-              fill = ~volume, 
-              opacity := 0.5) %>%
-        layer_points() %>%
-        add_tooltip(function(df) paste0("$", df$close)) #closing price plot
+# eth_price_history %>%
+#         ggvis(x = ~time, y = ~close, 
+#               fill = ~volume, 
+#               opacity := 0.5) %>%
+#         layer_points() %>%
+#         add_tooltip(function(df) paste0("$", df$close)) %>%
+#         bind_shiny("ggivs", "ggvis_ui") #closing price plot
 
-eth_price_history %>%
-        ggvis(x = ~time, y = ~volume, y2 = ~0, 
-              fill := "black") %>%
-        layer_ribbons() # volume plot
+# eth_price_history %>%
+#         ggvis(x = ~time, y = ~close, 
+#               fill = ~volume, 
+#               opacity := 0.5) %>%
+#         layer_points()
+
+# plot_eth_volume <- eth_price_history %>%
+#         ggvis(x = ~time, y = ~volume, y2 = ~0, 
+#               fill := "black") %>%
+#         layer_ribbons() # volume plot
 
 # ##########
 # # coin <- GET('https://min-api.cryptocompare.com')

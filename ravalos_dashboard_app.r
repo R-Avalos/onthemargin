@@ -13,19 +13,29 @@ library('shinydashboard')
 library('shiny')
 source("coin_data.r")
 
+shinyApp(ui, server) #preview dashboard
+
 ui <- dashboardPage(
         dashboardHeader(title = "Randy Avalos"),
         dashboardSidebar(
-                menuItem(text = "Github", 
-                         tabName = "Github", 
-                         icon = icon("github"),
-                         badgeLabel = "Commit History",
-                         badgeColor = "teal"
-                         )
+                sidebarMenu(
+                        menuItem(text = "Github", 
+                                 tabName = "github", 
+                                 icon = icon("github"),
+                                 badgeLabel = "Commit History",
+                                 badgeColor = "teal"
+                                 ),
+                        menuItem(text = "Coins",
+                                 tabName = "coins",
+                                 icon = icon("dashboard")
+                                 )
+                        )
                 ),
+        
         dashboardBody(
+                tabItems(
                 # Github tab
-                tabItem(tabName = "Github",
+                tabItem(tabName = "github",
                         fluidRow(box(plotOutput("testPlot", height = 250)),
                                  box(plotOutput("testPlot2", height = 250)),
                                  box(title = "tesPlot2 Controls",
@@ -35,7 +45,15 @@ ui <- dashboardPage(
                                      sliderInput("slider", "Obs Count:", 1, 100, 50)
                                      )    
                                  
-                                 ),
+                                 )
+                        ),
+                
+                #Coin Tab
+                tabItem(tabName = "coins",
+                        h2("Test"),
+                        fluidRow(
+                                box(ggvisOutput("eth_price_history")
+                                ),
                         fluidRow(infoBox("Ethereum", 
                                          paste0("$", prettyNum(content(ethereum_price)$data$amount, big.mark = ",")
                                                 )
@@ -46,10 +64,10 @@ ui <- dashboardPage(
                                          )
                                  )
                         )
+                        )
                 )
         )
-
-shinyApp(ui, server) #preview dashboard
+)
 
 
 server <- function(input,output){
@@ -68,5 +86,13 @@ server <- function(input,output){
                         hist(data)
                 }
         )
+        
+        eth_price_history %>%
+                ggvis(x = ~time, y = ~close, 
+                      fill = ~volume, 
+                      opacity := 0.5) %>%
+                layer_points() %>%
+                bind_shiny("eth_price_history") #closing price plot
+        
 }
 

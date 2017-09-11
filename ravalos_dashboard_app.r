@@ -28,6 +28,10 @@ ui <- dashboardPage(
                         menuItem(text = "Coins",
                                  tabName = "coins",
                                  icon = icon("dashboard")
+                                 ),
+                        menuItem(text = "Fantasy Football",
+                                 tabName = "football",
+                                 icon = icon("dashboard")
                                  )
                         )
                 ),
@@ -35,35 +39,39 @@ ui <- dashboardPage(
         dashboardBody(
                 tabItems(
                 # Github tab
-                tabItem(tabName = "github",
-                        fluidRow(box(plotOutput("testPlot", height = 250)),
-                                 box(plotOutput("testPlot2", height = 250)),
-                                 box(title = "tesPlot2 Controls",
-                                     sliderInput("slider2", "Count", 1, 500, 100)
-                                     ),
-                                 box(title = "testPlot Controls",
-                                     sliderInput("slider", "Obs Count:", 1, 100, 50)
-                                     )    
+                        tabItem(tabName = "github",
+                                fluidRow(box(plotOutput("testPlot", 
+                                                        height = 250)),
+                                box(plotOutput("testPlot2", height = 250)),
+                                box(title = "tesPlot2 Controls",
+                                    sliderInput("slider2", "Count", 1, 500, 100)
+                                    ),
+                                box(title = "testPlot Controls",
+                                    sliderInput("slider", "Obs Count:", 1, 100, 50)
+                                    )    
                                  
                                  )
                         ),
-                
-                #Coin Tab
-                tabItem(tabName = "coins",
-                        h2("Test"),
-                        fluidRow(
-                                box(ggvisOutput("eth_price_history")
+                        #Coin Tab
+                        tabItem(tabName = "coins",
+                                h2("Test"),
+                                fluidRow(
+                                        box(ggvisOutput("eth_price_history")),
+                                         fluidRow(infoBox("Ethereum", 
+                                                          paste0("$", 
+                                                                 prettyNum(content(ethereum_price)$data$amount, big.mark = ",")
+                                                                 )
+                                                          ),
+                                        infoBox("Bitcoin", 
+                                                paste0("$", prettyNum(content(bitcoin_price)$data$amount, big.mark = ",")
+                                                       )
+                                                )
+                                        )
+                                        )
                                 ),
-                        fluidRow(infoBox("Ethereum", 
-                                         paste0("$", prettyNum(content(ethereum_price)$data$amount, big.mark = ",")
-                                                )
-                                         ),
-                                 infoBox("Bitcoin", 
-                                         paste0("$", prettyNum(content(bitcoin_price)$data$amount, big.mark = ",")
-                                                )
-                                         )
-                                 )
-                        )
+                        # Football Tab
+                        tabItem(tabName = "football",
+                                h2("Fantasy Football")
                         )
                 )
         )
@@ -74,19 +82,28 @@ server <- function(input,output){
         set.seed(42)
         histdata <- rnorm(500)
         histdata2 <- rnorm(1000)
-        output$testPlot <- renderPlot(
-                {
+        
+        output$testPlot <- renderPlot({
                 data <- histdata[seq_len(input$slider)]
                 hist(data)
-        }
-        )
-        output$testPlot2 <- renderPlot(
-                {
+                })
+        output$testPlot2 <- renderPlot({
                         data <- histdata2[seq_len(input$slider2)]
                         hist(data)
-                }
-        )
+                        })
         
+        output$eth_pricePlot <- renderPlot({
+                plot_eth_price_hist <- ggplot(eth_price_history, aes(x = time, y = close)) +
+                        geom_hline(yintercept = eth_price_history$close[1], 
+                                   color = "light grey") +
+                        geom_line() +
+                        ggtitle("Ethereum Price History") +
+                        ylab("Closing Price USD") +
+                        xlab("") +
+                        theme_tufte()
+        })
+        
+
         eth_price_history %>%
                 ggvis(x = ~time, y = ~close, 
                       fill = ~volume, 

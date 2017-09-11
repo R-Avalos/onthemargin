@@ -8,6 +8,7 @@ library(dplyr)
 library(ggplot2)
 library(ggvis)
 library(lubridate)
+library(ggthemes)
 
 #Coinbase API
 bitcoin_price <- GET("https://api.coinbase.com/v2/prices/BTC-USD/spot")
@@ -33,6 +34,18 @@ eth_price_history <- rename(eth_price_history,
                             "volume" = X6
                             )
 eth_price_history$time <- as_datetime(eth_price_history$time) # convert epoch to human readible datetime
+
+plot_eth_price_hist <- ggplot(eth_price_history, aes(x = time, y = close)) +
+        geom_hline(yintercept = eth_price_history$close[1], color = "light grey") +
+        geom_line() +
+        ggtitle("Ethereum Price History") +
+        ylab("Closing Price USD") +
+        xlab("") +
+        theme_tufte()
+
+plot_eth_price_hist
+
+
 
 # Plot of ethereum
 # eth_price_history %>%

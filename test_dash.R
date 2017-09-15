@@ -1,14 +1,16 @@
 # Test Dashabord light framework
-library('shiny')
-library('shinydashboard')
-library('ggplot2')
-library('ggthemes')
+library(shiny)
+library(shinydashboard)
+library(ggplot2)
+library(ggthemes)
+library(dplyr)
 
 ui <- dashboardPage(
-        dashboardHeader(title = "Drone Racing"),
+        skin = "green",
+        dashboardHeader(title = "MultiGP Drone Racing"),
         dashboardSidebar(
                 sidebarMenu(
-                        menuItem(text = "Bessel", 
+                        menuItem(text = "Bessel Run", 
                                  tabName = "bessel"
                                  )
                         )
@@ -16,19 +18,52 @@ ui <- dashboardPage(
         dashboardBody(
                 tabItems(
                         tabItem(tabName = "bessel",
-                                h2("Bessel Run Times"),
-                                plotOutput("bessel_plot", width = "auto", height = "600px" )
+                                h2("Bessel Run, Race Times"),
+                                fluidRow(
+                                        
+                                        radioButtons(
+                                                inputId = "radio",
+                                                label = "Selection Type:",
+                                                choices = list(
+                                                        "All",
+                                                        "Manual Select"
+                                                ),
+                                                selected = "All"
+                                        ),
+                                        
+                                        selectizeInput("select_chapter_input",
+                                                    label = "Chapters",
+                                                    choices = bessel_results$Chapter,
+                                                    selected = bessel_results$Chapter[bessel_results$Time == min(bessel_results$Time)],
+                                                    multiple = TRUE)
+                                        
+                                ),
+                                plotOutput(
+                                        "bessel_plot", 
+                                        width = "auto", height = "600px",
+                                        hover = hoverOpts(id = "bessel_hover")   
+                                        )
                                 )
                         )
                 )
 )
-        
 
 server <- function(input,output){
         output$bessel_plot <- renderPlot({
-                data <- bessel_results # cleaned bessel results
-                bessel_plot <- ggplot(data = y, aes(x = Time, y = Chapter, color = Date.Recorded)) +
-                        geom_vline(xintercept = min(y$Time), 
+                plot_data <- reactive({
+                        if(input$radio == "All"){
+                                bessel_results
+                        }
+                        else {
+                        bessel_results %>%
+                                filter(Chapter == input$select_chapter_input)
+                        }
+                })
+                        
+
+                bessel_plot <- ggplot(data = plot_data(), 
+                                      aes(x = Time, y = Chapter, color = Date.Recorded)) +
+                        geom_vline(xintercept = min(plot_data()$Time), 
                                    color = "red", 
                                    alpha = 0.5, 
                                    size = 1) +
@@ -40,6 +75,5 @@ server <- function(input,output){
                 print(bessel_plot)
         })
 }
-
 
 shinyApp(ui, server) #preview dashboard

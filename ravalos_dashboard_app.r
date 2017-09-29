@@ -9,8 +9,8 @@
 
 # infoBox() for small amounts of info
 # valueBox() for small amounts of info
-library('shinydashboard')
-library('shiny')
+library(shinydashboard)
+library(plotly)
 source("coin_data.r")
 
 shinyApp(ui, server) #preview dashboard

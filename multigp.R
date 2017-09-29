@@ -21,10 +21,19 @@ bessel_results <- race_results %>% filter(Course == "Bessel Run")
 # Order results by fastest
 
 # Plot Data
-race_plot <- ggplot(data = race_results, aes(x = Time, y = Chapter, color = Course)) +
-        geom_point(alpha = 0.25)
-race_plot
+plot_ly(race_results, x = ~Time, y = ~Chapter, color = ~Course, type = "scatter") %>%
+        add_markers(alpha = 0.2) %>%
+        layout(title = "MultiGP Race Results")
 
-bessel_plot <- ggplot(data = bessel_results, aes(x = Time, y = Chapter, color = Pilot.Handle)) +
-        geom_point(alpha = 0.25)
-bessel_plot
+
+plot_ly(race_results, x = ~Time, y = ~Course, alpha = 0.1, type = "scatter") %>%
+        layout(title = "MultiGP Race Results")
+
+
+# race_plot <- ggplot(data = race_results, aes(x = Time, y = Chapter, color = Course)) +
+#         geom_point(alpha = 0.25)
+# race_plot
+# 
+# bessel_plot <- ggplot(data = bessel_results, aes(x = Time, y = Chapter, color = Pilot.Handle)) +
+#         geom_point(alpha = 0.25)
+# bessel_plot

@@ -1,23 +1,22 @@
 # Test Dashabord light framework
 library(shiny)
 library(shinydashboard)
-library(ggplot2)
-library(ggthemes)
+library(shiny)
 library(dplyr)
 
 ## Functions
-googleSearchLink <- function(val) {
-        sprintf('<a href="https://www.google.com/#q=%s" target="_blank" class="btn btn-primary">Info</a>',val)
-} # google search
+# googleSearchLink <- function(val) {
+#         sprintf('<a href="https://www.google.com/#q=%s" target="_blank" class="btn btn-primary">Info</a>',val)
+# } # google search
 
 createLink <- function(link, reference) {
         paste0('<a href=', link, ">", reference, "</a>")
 } # pilot link
 
-bessel_results[1,]
-bessel_results$Pilot_link[1]
-bessel_results$Pilot.Handle[1]
-createLink(link = bessel_results$Pilot_link[1], reference = bessel_results$Pilot.Handle[1])
+# bessel_results[1,]
+# bessel_results$Pilot_link[1]
+# bessel_results$Pilot.Handle[1]
+# createLink(link = bessel_results$Pilot_link[1], reference = bessel_results$Pilot.Handle[1])
 
 
 ## Dashboard

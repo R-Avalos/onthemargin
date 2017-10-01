@@ -21,14 +21,27 @@ bessel_results <- race_results %>% filter(Course == "Bessel Run")
 # Order results by fastest
 
 # Plot Data
-plot_ly(race_results, x = ~Time, y = ~Chapter, color = ~Course, type = "scatter") %>%
-        add_markers(alpha = 0.2) %>%
-        layout(title = "MultiGP Race Results")
-
-
-plot_ly(race_results, x = ~Time, y = ~Course, alpha = 0.1, type = "scatter") %>%
-        layout(title = "MultiGP Race Results")
-
+plot_ly(race_results, x = ~Time, y = ~Course, 
+        alpha = 0.1, 
+        type = "scatter",
+        mode = "markers",
+        hoverinfo = 'text',
+        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>", 
+                       Pilot.Handle, 
+                       "</b></br>",
+                       "</br>",
+                       "<span style='color:grey'>Chapter </span>", 
+                       Chapter,
+                       "</br><span style='color:grey'> Time </span>", 
+                       Time, 
+                       " secs")
+        ) %>%
+        layout(title = "MultiGP Race Results",
+               margin = list(l = 100),
+               hoverlabel = list(font = list(color = "blue"),
+                                 bgcolor = "white",
+                                 bordercolor = "white")
+               )
 
 # race_plot <- ggplot(data = race_results, aes(x = Time, y = Chapter, color = Course)) +
 #         geom_point(alpha = 0.25)

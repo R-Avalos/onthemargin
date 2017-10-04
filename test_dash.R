@@ -26,6 +26,8 @@ ui <- dashboardPage(
         dashboardHeader(title = "MultiGP Drone Racing"),
         dashboardSidebar(
                 sidebarMenu(
+                        menuItem(text = "All Courses",
+                                 tabName= "allcourses"),
                         menuItem(text = "Bessel Run", 
                                  tabName = "bessel"
                                  ),
@@ -35,6 +37,10 @@ ui <- dashboardPage(
                 ),
         dashboardBody(
                 tabItems(
+                        tabItem(tabName = "allcourses",
+                                h2("MultiGP Recorded Race Times by Course"),
+                                plotlyOutput(outputId = "allcourse_plot")
+                                ),
                         # tabItem(tabName = "bessel",
                         #         h2("Bessel Run, Race Times"),
                         #         plotOutput(
@@ -55,18 +61,34 @@ ui <- dashboardPage(
 
 server <- function(input,output){
         output$bessel_table <- renderDataTable({bessel_results})
+        output$allcourse_plot <- renderPlotly({
+                plot_ly(race_results, x = ~Date.Recorded, y = ~Time, color = ~Course,
+                        alpha = 0.75, 
+                        type = "scatter",
+                        mode = "markers",
+                        hoverinfo = 'text',
+                        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>", 
+                                       Pilot.Handle, 
+                                       "</b></br>",
+                                       "</br>",
+                                       "<span style='color:grey'>Chapter </span>", 
+                                       Chapter,
+                                       "</br><span style='color:grey'> Course </span>",
+                                       Course,
+                                       "</br><span style='color:grey'> Time </span>", 
+                                       Time, 
+                                       " secs")
+                ) %>%
+                        layout(title = "MultiGP Race Results",
+                               margin = list(l = 100),
+                               hoverlabel = list(font = list(color = "blue"),
+                                                 bgcolor = "white",
+                                                 bordercolor = "white"),
+                               xaxis = list(title = "Recorded Date")
+                        )
+                
+        })
         
-        # output$bessel_plot <- ggplot(data = bessel_results, 
-        #                       aes(x = Time, y = Chapter, color = Date.Recorded)) +
-        #         geom_vline(xintercept = min(bessel_results$Time), 
-        #                    color = "red", 
-        #                    alpha = 0.5, 
-        #                    size = 1) +
-        #         geom_point(alpha = 0.5, size =2) +
-        #         scale_y_discrete(limits = rev(levels(bessel_results$Chapter))) +
-        #         scale_x_continuous(breaks = c(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80)) +
-        #         limits = c(0, max(bessel_results$Time+5)) +
-        #         theme_tufte()
 }
 
 shinyApp(ui, server) #preview dashboard

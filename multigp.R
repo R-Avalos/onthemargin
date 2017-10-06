@@ -38,21 +38,32 @@ plot_ly(bessel_results, x = ~Date.Recorded, y = ~Time,
                        " secs"),
         marker = list(color = 'rgb(0, 66, 37)', opacity = 0.4)
 ) %>%
+        add_trace(name = paste0("Mean Race Time ", round(mean(bessel_results$Time), digits = 2), " secs"), 
+                  y = mean(bessel_results$Time), mode = "lines",
+                  line = list(color = "red", opacity = 0.2),
+                  marker = list(opacity = 0)
+                  ) %>%
+        add_annotations(
+                text = paste0("Mean Race Time: ", 
+                              round(mean(bessel_results$Time), 2), 
+                              " secs"),
+                x = mean(bessel_results$Date.Recorded),
+                y = mean(bessel_results$Time),
+                yanchor = "bottom",
+                showarrow = FALSE,
+                font = list(color = "red")
+        ) %>%
         layout(title = "Bessel Run Race Results",
                margin = list(l = 100),
                hoverlabel = list(font = list(color = "blue"),
                                  bgcolor = "white",
                                  bordercolor = "white"),
-               xaxis = list(title = "Recorded Date")
-        ) %>%
-        add_trace(name = paste0("Mean Race Time ", round(mean(bessel_results$Time), digits = 2), " secs"), 
-                  y = mean(bessel_results$Time), mode = "lines",
-                  line = list(color = "red", opacity = 0.2),
-                  marker = list(opacity = 0)
-                  )
+               xaxis = list(title = "Recorded Date"),
+               showlegend = FALSE
+        )
 
 
- # race_plot <- ggplot(data = race_results, aes(x = Time, y = Chapter, color = Course)) +
+ x`# race_plot <- ggplot(data = race_results, aes(x = Time, y = Chapter, color = Course)) +
 #         geom_point(alpha = 0.25)
 # race_plot
 # 

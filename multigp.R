@@ -3,6 +3,7 @@ library(dplyr)
 library(lubridate)
 library(stringr)
 library(ggplot2)
+library(ggthemes)
 
 # Load and Trasnsform Data
 race_results <- read.csv(file = "multigp_course_times.csv", header = T, stringsAsFactors = F)
@@ -26,7 +27,46 @@ fury <- race_results %>% filter(Course == "Fury")
 high_voltage <- race_results %>% filter(Course == "High Voltage")
 # Order results by fastest
 
+
+#### Fury Top 5
+fury_top5 <- race_results %>%
+        filter(Rank < 6 & Course == "Fury") %>%
+        select(Rank, Pilot.Handle, Time)
+
+fury_avg <- race_results %>%
+        filter(Course == "Fury") %>%
+        summarise(Time = round(mean(Time), 2))
+
+fury_avg$Rank <- ""
+fury_avg$Pilot.Handle <- "Avg Course Time"
+fury_top5 <- rbind(fury_top5, fury_avg)
+fury_top5 <- fury_top5 %>% rename(`Pilot Handle` = Pilot.Handle)
+
+
 # Test plots
+
+p <- ggplot(fury, aes(x = Time)) +
+        stat_density(fill = "red", alpha = 0.2) +
+        expand_limits(y = 0) +
+        geom_vline(xintercept = mean(fury$Time), alpha = 0.5) +
+        xlab("Fury Course Times (Seconds)") +
+        theme_tufte()
+p <- p + annotate("text", x = mean(fury$Time)+12, y = 0.075, 
+             label = paste0("Fury Mean Time \n", round(mean(fury$Time), 2), " secs"))
+p
+test_p <- ggplotly(p)   
+test_p
+
+fury_fit <- density(fury$Time)
+plot_ly(x = fury$Time, type = "histogram", name = "Fury", alpha = 0, color = "red") %>%
+        add_trace(x = fury_fit$x, y = fury_fit$y, 
+                  type = "scatter", mode = "lines", 
+                  fill = "tozeroy", yaxis = "y2") %>%
+        layout(yaxis2 = list(overlaying = "y", side = "right"))
+        
+
+
+
 high_voltage_plot <- plot_ly(high_voltage, x = ~Date.Recorded, y = ~Time,
                      name = "Recorded Race Time",
                      type = "scatter",
@@ -70,87 +110,6 @@ high_voltage_plot
 
 
 
-fury_plot <- plot_ly(fury, x = ~Date.Recorded, y = ~Time,
-        name = "Recorded Race Time",
-        type = "scatter",
-        mode = "markers",
-        hoverinfo = 'text',
-        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>", 
-                       Pilot.Handle, 
-                       "</b></br>",
-                       "</br>",
-                       "<span style='color:grey'>Chapter </span>", 
-                       Chapter,
-                       "</br><span style='color:grey'> Time </span>", 
-                       Time, 
-                       " secs"),
-        marker = list(color = 'rgb(0, 66, 37)', opacity = 0.4)
-) %>%
-        add_trace(name = paste0("Mean Race Time ", round(mean(fury$Time), digits = 2), " secs"), 
-                  y = mean(fury$Time), mode = "lines",
-                  line = list(color = "red", opacity = 0.2),
-                  marker = list(opacity = 0)
-        ) %>%
-        add_annotations(
-                text = paste0("Mean Race Time: ", 
-                              round(mean(fury$Time), 2), 
-                              " secs"),
-                x = mean(fury$Date.Recorded),
-                y = mean(fury$Time),
-                yanchor = "bottom",
-                showarrow = FALSE,
-                font = list(color = "red")
-        ) %>%
-        layout(title = "Fury Race Results",
-               margin = list(l = 100),
-               hoverlabel = list(font = list(color = "blue"),
-                                 bgcolor = "#f6f6f6",
-                                 bordercolor = "white"),
-               xaxis = list(title = "Recorded Date"),
-               showlegend = FALSE
-        )
-fury_plot
-
-
-plot_ly(bessel_run, x = ~Date.Recorded, y = ~Time,
-        name = "Recorded Race Time",
-        type = "scatter",
-        mode = "markers",
-        hoverinfo = 'text',
-        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>", 
-                       Pilot.Handle, 
-                       "</b></br>",
-                       "</br>",
-                       "<span style='color:grey'>Chapter </span>", 
-                       Chapter,
-                       "</br><span style='color:grey'> Time </span>", 
-                       Time, 
-                       " secs"),
-        marker = list(color = 'rgb(0, 66, 37)', opacity = 0.4)
-) %>%
-        add_trace(name = paste0("Mean Race Time ", round(mean(bessel_run$Time), digits = 2), " secs"), 
-                  y = mean(bessel_run$Time), mode = "lines",
-                  line = list(color = "red", opacity = 0.2),
-                  marker = list(opacity = 0)
-                  ) %>%
-        add_annotations(
-                text = paste0("Mean Race Time: ", 
-                              round(mean(bessel_run$Time), 2), 
-                              " secs"),
-                x = mean(bessel_run$Date.Recorded),
-                y = mean(bessel_run$Time),
-                yanchor = "bottom",
-                showarrow = FALSE,
-                font = list(color = "red")
-        ) %>%
-        layout(title = "Bessel Run Race Results",
-               margin = list(l = 100),
-               hoverlabel = list(font = list(color = "blue"),
-                                 bgcolor = "#f6f6f6",
-                                 bordercolor = "white"),
-               xaxis = list(title = "Recorded Date"),
-               showlegend = FALSE
-        )
 
 
 # race_plot <- ggplot(data = race_results, aes(x = Time, y = Chapter, color = Course)) +

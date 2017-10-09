@@ -44,6 +44,13 @@ ui <- dashboardPage(
                 tabItems(
                         tabItem(tabName = "allcourses",
                                 h2("MultiGP Recorded Race Times by Course"),
+                                fluidRow(
+                                        column(
+                                                width = 6,
+                                                h4("Fury Top 5 Pilots"),
+                                                tableOutput("fury_top5")
+                                        )
+                                ),
                                 plotlyOutput(outputId = "allcourse_plot")
                                 ),
                         tabItem(tabName = "bessel",
@@ -132,7 +139,51 @@ server <- function(input,output){
                         )
                 
         })
-        
+        output$fury_plot <- renderPlotly({
+                plot_ly(fury, x = ~Date.Recorded, y = ~Time,
+                        name = "Recorded Race Time",
+                        type = "scatter",
+                        mode = "markers",
+                        hoverinfo = 'text',
+                        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>", 
+                                       Pilot.Handle, 
+                                       "</b></br>",
+                                       "</br>",
+                                       "<span style='color:grey'>Chapter </span>", 
+                                       Chapter,
+                                       "</br><span style='color:grey'> Time </span>", 
+                                       Time, 
+                                       " secs"),
+                        marker = list(color = 'rgb(0, 66, 37)', opacity = 0.4)
+                ) %>%
+                        add_trace(name = paste0("Mean Race Time ", round(mean(fury$Time), digits = 2), " secs"), 
+                                  y = mean(fury$Time), mode = "lines",
+                                  line = list(color = "red", opacity = 0.2),
+                                  marker = list(opacity = 0)
+                        ) %>%
+                        add_annotations(
+                                text = paste0("Mean Race Time: ", 
+                                              round(mean(fury$Time), 2), 
+                                              " secs"),
+                                x = mean(fury$Date.Recorded),
+                                y = mean(fury$Time),
+                                yanchor = "bottom",
+                                showarrow = FALSE,
+                                font = list(color = "red")
+                        ) %>%
+                        layout(title = "Fury Race Results",
+                               margin = list(l = 100),
+                               hoverlabel = list(font = list(color = "blue"),
+                                                 bgcolor = "#f6f6f6",
+                                                 bordercolor = "white"),
+                               xaxis = list(title = "Recorded Date"),
+                               showlegend = FALSE
+                        )
+        })
+        output$fury_top5 <- renderTable(fury_top5, 
+                                        hover = TRUE,
+                                        spacing = "xs")
+        # "fury_top5"
 }
 
 shinyApp(ui, server) #preview dashboard

@@ -13,8 +13,6 @@ race_results$Pilot_link <- paste0("https://www.multigp.com/pilots/view/?pilot=",
 race_results$Pilot_link <- str_replace_all(race_results$Pilot_link, pattern = " ", replacement = "") #remove spaces from url link
 race_results$Course <- as.factor(race_results$Course)
 race_results$Chapter <- as.factor(race_results$Chapter)
-
-# summary(race_results)
 race_results <- race_results %>%
         filter(Date.Recorded > ymd("2015-1-1")) #remove misrecorded data
 
@@ -25,22 +23,32 @@ bessel_results <- race_results %>% filter(Course == "Bessel Run")
 bessel_run <- race_results %>% filter(Course == "Bessel Run")
 fury <- race_results %>% filter(Course == "Fury")
 high_voltage <- race_results %>% filter(Course == "High Voltage")
+nautilus <- race_results %>% filter(Course == "Nautilus")
+tsunami <- race_results %>% filter(Course == "Tsunami")
+utt1 <- race_results %>% filter(Course == "UTT1")
+
+
 # Order results by fastest
-
-
 #### Fury Top 5
-fury_top5 <- race_results %>%
-        filter(Rank < 6 & Course == "Fury") %>%
-        select(Rank, Pilot.Handle, Time)
+# Function to return top 5 and average into table, order fast-slow with mean avg at end.
+func_top5 <- function(race_data = race_results, course_name) {
+        top5 <- race_data %>%
+                filter(Rank < 6 & Course == course_name) %>%
+                select(Rank, Pilot.Handle, Time)
+        race_avg <- race_data %>%
+                filter(Course == course_name) %>%
+                summarise(Time = round(mean(Time), 2))
+        race_avg$Rank <- ""
+        race_avg$Pilot.Handle <- "AVG Course Time"
+        top5 <- rbind(top5, race_avg) #row bind tables
+        top5 <- top5 %>% rename(`Pilot Handle` = Pilot.Handle)
+        print(top5)
+        return(top5)
+}
 
-fury_avg <- race_results %>%
-        filter(Course == "Fury") %>%
-        summarise(Time = round(mean(Time), 2))
+fury_top5 <- func_top5(race_data = race_results, course_name = "Fury")
 
-fury_avg$Rank <- ""
-fury_avg$Pilot.Handle <- "Avg Course Time"
-fury_top5 <- rbind(fury_top5, fury_avg)
-fury_top5 <- fury_top5 %>% rename(`Pilot Handle` = Pilot.Handle)
+
 
 
 # Test plots

@@ -4,6 +4,7 @@ library(lubridate)
 library(stringr)
 library(ggplot2)
 library(ggthemes)
+library(plotly)
 
 # Load and Trasnsform Data
 race_results <- read.csv(file = "multigp_course_times.csv", header = T, stringsAsFactors = F)
@@ -46,10 +47,12 @@ func_top5 <- function(race_data = race_results, course_name) {
         return(top5)
 }
 
+bessel_top5 <- func_top5(race_data = race_results, course_name = "Bessel Run")
 fury_top5 <- func_top5(race_data = race_results, course_name = "Fury")
-
-
-
+high_top5 <- func_top5(race_data = race_results, course_name = "High Voltage")
+nautilus_top5 <- func_top5(race_data = race_results, course_name = "Nautilus")
+tsunami_top5 <- func_top5(race_data = race_results, course_name = "Tsunami")
+utt1_top5 <- func_top5(race_data = race_results, course_name = "UTT1")
 
 # Test plots
 
@@ -59,8 +62,8 @@ p <- ggplot(fury, aes(x = Time)) +
         geom_vline(xintercept = mean(fury$Time), alpha = 0.5) +
         xlab("Fury Course Times (Seconds)") +
         theme_tufte()
-p <- p + annotate("text", x = mean(fury$Time)+12, y = 0.075, 
-             label = paste0("Fury Mean Time \n", round(mean(fury$Time), 2), " secs"))
+# p <- p + annotate("text", x = mean(fury$Time)+12, y = 0.075, 
+#              label = paste0("Fury Mean Time \n", round(mean(fury$Time), 2), " secs"))
 p
 test_p <- ggplotly(p)   
 test_p

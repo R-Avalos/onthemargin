@@ -40,9 +40,9 @@ func_top5 <- function(race_data = race_results, course_name) {
                 filter(Course == course_name) %>%
                 summarise(Time = round(mean(Time), 2))
         race_avg$Rank <- ""
-        race_avg$Pilot.Handle <- "AVG Course Time"
+        race_avg$Pilot.Handle <- "AVG"
         top5 <- rbind(top5, race_avg) #row bind tables
-        top5 <- top5 %>% rename(`Pilot Handle` = Pilot.Handle)
+        top5 <- top5 %>% rename(`Pilot` = Pilot.Handle)
         print(top5)
         return(top5)
 }
@@ -53,6 +53,8 @@ high_top5 <- func_top5(race_data = race_results, course_name = "High Voltage")
 nautilus_top5 <- func_top5(race_data = race_results, course_name = "Nautilus")
 tsunami_top5 <- func_top5(race_data = race_results, course_name = "Tsunami")
 utt1_top5 <- func_top5(race_data = race_results, course_name = "UTT1")
+
+
 
 # Test plots
 
@@ -65,8 +67,34 @@ p <- ggplot(fury, aes(x = Time)) +
 # p <- p + annotate("text", x = mean(fury$Time)+12, y = 0.075, 
 #              label = paste0("Fury Mean Time \n", round(mean(fury$Time), 2), " secs"))
 p
+
+
+
 test_p <- ggplotly(p)   
-test_p
+fury_avg_text <- list(
+        x = mean(fury$Time),
+        y = 0.075,
+        text = paste0("Avg Time ", round(mean(fury$Time), 2), " secs"),
+        xref = "x",
+        yref = "y",
+        showarrow = TRUE,
+        arrowhead = 8,
+        arrowsize = 0.25,
+        arrowcolor = "#D3D3D3",
+        xanchor = "left",
+        ax = sd(fury$Time),
+        ay = 0,
+        font = list(color = "#D3D3D3")
+)
+test_p2 <- test_p %>%
+        layout(annotations = fury_avg_text)
+fury_top5
+subplot(test_p2, fury_top5)
+renderTable(fury_top5, 
+            hover = TRUE,
+            spacing = "xs")
+#
+
 
 fury_fit <- density(fury$Time)
 plot_ly(x = fury$Time, type = "histogram", name = "Fury", alpha = 0, color = "red") %>%

@@ -43,15 +43,32 @@ ui <- dashboardPage(
         dashboardBody(
                 tabItems(
                         tabItem(tabName = "allcourses",
-                                h2("MultiGP Recorded Race Times by Course"),
                                 fluidRow(
-                                        column(
-                                                width = 6,
-                                                h4("Fury Top 5 Pilots"),
+                                        column( width = 3, 
+                                                "Fury Top 5 Pilots",
                                                 tableOutput("fury_top5")
+                                                # box(title = "Test",
+                                                #     height = 2,
+                                                #     width = NULL,
+                                                #     plotlyOutput(outputId = "fury_density")
+                                                #     ),
+                                                # box(tableOutput("fury_top5"))
+                                                ),
+                                        column(width = 3,
+                                               "Bessel Top 5 Pilots",
+                                               tableOutput("bessel_top5")
+                                               ),
+                                        column(width = 3,
+                                               "High Voltage Top 5 Pilots",
+                                               tableOutput("high_top5")
+                                        ),
+                                        column(width = 3,
+                                               "Nautilus Top 5 Pilots",
+                                               tableOutput("nautilus_top5")
                                         )
-                                ),
-                                plotlyOutput(outputId = "allcourse_plot")
+                                        # column(width = 6, 
+                                        #        plotlyOutput(outputId = "fury_density"))
+                                            )
                                 ),
                         tabItem(tabName = "bessel",
                                 h2("Bessel Run, Race Times"),
@@ -182,8 +199,27 @@ server <- function(input,output){
         })
         output$fury_top5 <- renderTable(fury_top5, 
                                         hover = TRUE,
+                                        spacing = "xs") # "fury_top5"
+        output$bessel_top5 <- renderTable(bessel_top5, 
+                                        hover = TRUE,
                                         spacing = "xs")
-        # "fury_top5"
+        output$high_top5 <- renderTable(high_top5, 
+                                          hover = TRUE,
+                                          spacing = "xs")
+        output$nautilus_top5 <- renderTable(nautilus_top5, 
+                                        hover = TRUE,
+                                        spacing = "xs")
+        output$fury_density <- renderPlotly({
+                ggplotly(
+                        ggplot(fury, aes(x = Time)) +
+                                stat_density(fill = "red", alpha = 0.2) +
+                                expand_limits(y = 0) +
+                                geom_vline(xintercept = mean(fury$Time), alpha = 0.5) +
+                                xlab("Fury Course Times (Seconds)") +
+                                theme_tufte()
+                ) %>%
+                        layout(annotations = fury_avg_text)
+        })
 }
 
 shinyApp(ui, server) #preview dashboard

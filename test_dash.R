@@ -23,6 +23,15 @@ test_df$url_link <- apply(test_df, MARGIN = 1, FUN = function(x) createLink(x['P
 
 bessel_results$Pilot_link <- apply(bessel_results, MARGIN = 1, FUN = function(x) createLink(x['Pilot_link'], x['Pilot.Handle']))
 
+### Data
+
+
+# Density Plot Table Colors
+cols <- matrix("black", nrow(fury_top5), ncol = ncol(fury_top5))
+cols[6, 2:3] <- "dodger blue"
+
+
+
 
 ## Dashboard
 
@@ -229,7 +238,7 @@ server <- function(input,output){
         })
         
                 
-        #####
+        ### Reactive Density Plot with Table Overlay
         top5_data <- reactive({
                 top5_results %>% filter(Course == input$course_top5)
         })
@@ -251,7 +260,8 @@ server <- function(input,output){
                         annotation_custom(tableGrob(table_df[,1:3], 
                                                     rows = NULL, 
                                                     theme = ttheme_minimal(
-                                                            core = list(fg_params = list(col = cols))
+                                                            core = list(fg_params = list(col = cols)),
+                                                            colhead=list(fg_params=list(col="grey", fontface=4L))
                                                     )),  
                                           xmin = -Inf, xmax = Inf,
                                           ymin = -Inf, ymax = Inf) +

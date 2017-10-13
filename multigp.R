@@ -32,6 +32,8 @@ utt1 <- race_results %>% filter(Course == "UTT1")
 # Order results by fastest
 #### Fury Top 5
 # Function to return top 5 and average into table, order fast-slow with mean avg at end.
+
+### Top 5 Pilots by COurse, Data Frame
 func_top5 <- function(race_data = race_results, course_name) {
         top5 <- race_data %>%
                 filter(Rank < 6 & Course == course_name) %>%
@@ -47,23 +49,16 @@ func_top5 <- function(race_data = race_results, course_name) {
         print(top5)
         return(top5)
 }
-
 bessel_top5 <- func_top5(race_data = race_results, course_name = "Bessel Run")
 fury_top5 <- func_top5(race_data = race_results, course_name = "Fury")
 high_top5 <- func_top5(race_data = race_results, course_name = "High Voltage")
 nautilus_top5 <- func_top5(race_data = race_results, course_name = "Nautilus")
 tsunami_top5 <- func_top5(race_data = race_results, course_name = "Tsunami")
 utt1_top5 <- func_top5(race_data = race_results, course_name = "UTT1")
-
 top5_results <- rbind(bessel_top5, fury_top5, high_top5, nautilus_top5, tsunami_top5, utt1_top5)
 
+
 # Test plots
-
-cols <- matrix("black", nrow(fury_top5), ncol = ncol(fury_top5))
-cols
-cols[6, 2:3] <- "dodger blue"
-cols
-
 p <- ggplot(fury, aes(x = Time)) +
         stat_density(fill = "black", alpha = 0.2) +
         expand_limits(y = 0) +
@@ -72,7 +67,8 @@ p <- ggplot(fury, aes(x = Time)) +
         annotation_custom(tableGrob(fury_top5[,1:3], 
                                     rows = NULL, 
                                     theme = ttheme_minimal(
-                                            core = list(fg_params = list(col = cols))
+                                            core = list(fg_params = list(col = cols)),
+                                            colhead=list(fg_params=list(col="grey", fontface=4L))
                                     )),  
                           xmin = -Inf, xmax = Inf,
                           ymin = -Inf, ymax = Inf) +

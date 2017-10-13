@@ -35,12 +35,13 @@ utt1 <- race_results %>% filter(Course == "UTT1")
 func_top5 <- function(race_data = race_results, course_name) {
         top5 <- race_data %>%
                 filter(Rank < 6 & Course == course_name) %>%
-                select(Rank, Pilot.Handle, Time)
+                select(Rank, Pilot.Handle, Time, Course)
         race_avg <- race_data %>%
                 filter(Course == course_name) %>%
                 summarise(Time = round(mean(Time), 2))
         race_avg$Rank <- ""
         race_avg$Pilot.Handle <- "AVG"
+        race_avg$Course <- top5$Course[1]
         top5 <- rbind(top5, race_avg) #row bind tables
         top5 <- top5 %>% rename(`Pilot` = Pilot.Handle)
         print(top5)
@@ -54,23 +55,38 @@ nautilus_top5 <- func_top5(race_data = race_results, course_name = "Nautilus")
 tsunami_top5 <- func_top5(race_data = race_results, course_name = "Tsunami")
 utt1_top5 <- func_top5(race_data = race_results, course_name = "UTT1")
 
-
+top5_results <- rbind(bessel_top5, fury_top5, high_top5, nautilus_top5, tsunami_top5, utt1_top5)
 
 # Test plots
 
+cols <- matrix("black", nrow(fury_top5), ncol = ncol(fury_top5))
+cols
+cols[6, 2:3] <- "dodger blue"
+cols
+
 p <- ggplot(fury, aes(x = Time)) +
-        stat_density(fill = "red", alpha = 0.2) +
+        stat_density(fill = "black", alpha = 0.2) +
         expand_limits(y = 0) +
-        geom_vline(xintercept = mean(fury$Time), alpha = 0.5) +
-        xlab("Fury Course Times (Seconds)") +
-        theme_tufte()
-# p <- p + annotate("text", x = mean(fury$Time)+12, y = 0.075, 
-#              label = paste0("Fury Mean Time \n", round(mean(fury$Time), 2), " secs"))
+        geom_vline(xintercept = mean(fury$Time), color = "dodger blue") +
+        xlab("Time (Seconds)") +
+        annotation_custom(tableGrob(fury_top5[,1:3], 
+                                    rows = NULL, 
+                                    theme = ttheme_minimal(
+                                            core = list(fg_params = list(col = cols))
+                                    )),  
+                          xmin = -Inf, xmax = Inf,
+                          ymin = -Inf, ymax = Inf) +
+                          #xmin = 50, xmax = max(fury$Time)-10,
+                          #ymin = 0.025, ymax = Inf) +
+        ggtitle(paste0(fury$Course[1], " Race Results")) +
+        theme_tufte() +
+        theme(plot.title = element_text(hjust = 0.5))
 p
 
-
-
+#####
 test_p <- ggplotly(p)   
+test_p
+
 fury_avg_text <- list(
         x = mean(fury$Time),
         y = 0.075,

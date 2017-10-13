@@ -37,7 +37,9 @@ ui <- dashboardPage(
                                  tabName = "bessel"
                                  ),
                         menuItem(text = "Bessel Table",
-                                 tabName = "bessel_table")
+                                 tabName = "bessel_table"),
+                        menuItem(text = "Test",
+                                 tabName = "test")
                         )
                 ),
         dashboardBody(
@@ -78,6 +80,11 @@ ui <- dashboardPage(
                                 h2("Bessel Run, Table of Results"),
                                 
                                 dataTableOutput(outputId = "bessel_table")
+                                ),
+                        tabItem(tabName = "test",
+                                "test",
+                                selectInput(inputId = "course_top5", label = "Course", choices = unique(top5_results$Course), selected = "Utt1"),
+                                plotOutput("test")
                                 )
                 )
         )
@@ -220,6 +227,45 @@ server <- function(input,output){
                 ) %>%
                         layout(annotations = fury_avg_text)
         })
+        
+                
+        #####
+        top5_data <- reactive({
+                top5_results %>% filter(Course == input$course_top5)
+        })
+        course_data <- reactive({
+                race_results %>% filter (Course == input$course_top5)
+        })
+        
+        output$test <- renderPlot({
+                table_d <- top5_data()
+                density_df <- course_data()
+                table_df <- table_d[order(table_d$Time),]
+                
+                p <- ggplot(density_df, aes(x = Time)) +
+                        stat_density(fill = "black", alpha = 0.2) +
+                        expand_limits(y = 0) +
+                        geom_vline(xintercept = mean(density_df$Time), color = "dodger blue") +
+                        xlab("Time (Seconds)") +
+                        scale_x_continuous(limits = c(0, max(race_results$Time))) +
+                        annotation_custom(tableGrob(table_df[,1:3], 
+                                                    rows = NULL, 
+                                                    theme = ttheme_minimal(
+                                                            core = list(fg_params = list(col = cols))
+                                                    )),  
+                                          xmin = -Inf, xmax = Inf,
+                                          ymin = -Inf, ymax = Inf) +
+                        #xmin = 50, xmax = max(fury$Time)-10,
+                        #ymin = 0.025, ymax = Inf) +
+                        ggtitle(paste0(density_df$Course[1], " Race Results")) +
+                        theme_tufte() +
+                        theme(plot.title = element_text(hjust = 0.5))
+                print(p)
+                
+        })
+        
+        
+        
 }
 
 shinyApp(ui, server) #preview dashboard

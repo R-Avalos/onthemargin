@@ -16,6 +16,9 @@ race_results$Course <- as.factor(race_results$Course)
 race_results$Chapter <- as.factor(race_results$Chapter)
 race_results <- race_results %>%
         filter(Date.Recorded > ymd("2015-1-1")) #remove misrecorded data
+race_results$year <- year(race_results$Date.Recorded)
+race_results$month <- month(race_results$Date.Recorded)
+
 
 # Subset
 summary(race_results$Course)
@@ -58,7 +61,46 @@ utt1_top5 <- func_top5(race_data = race_results, course_name = "UTT1")
 top5_results <- rbind(bessel_top5, fury_top5, high_top5, nautilus_top5, tsunami_top5, utt1_top5)
 
 
-# Test plots
+### Chapter Data ###
+###################
+
+# Count active chapters
+active_chapters <- unique(race_results$Chapter)
+length(active_chapters)
+
+chapter_df <- race_results %>%
+        group_by(Chapter) %>%
+        summarize(Active_Pilots = length(unique(Pilot.Handle)),
+                  Races = length(Time),
+                  Unique_Tracks_Raced = length(unique(as.character(Course))),
+                  First_Race_Date = min(Date.Recorded),
+                  Last_Race_Date = max(Date.Recorded)
+        )
+head(chapter_df)
+summary(chapter_df)
+
+chapter_race_df <- race_results %>%
+        group_by(Chapter, year, month, Course) %>%
+        summarize(Races = length(Time),
+                  Min_Time = min(Time),
+                  Max_Time = max(Time),
+                  Mean_Time = mean(Time),
+                  Median_Time = median(Time),
+                  SD_Time = sd(Time))
+
+chapter_race_df$date <- ymd(paste0(chapter_race_df$year, "-",
+                                   chapter_race_df$month, "-",
+                                   "1")
+                            )
+head(chapter_race_df)
+summary(chapter_race_df)
+
+#### Test plots  ###
+###################
+
+## Chapter Drill Down Plot, Single chapter's Mean Time by Course over time, with SD band along with min and max dashed lines. Select Courses to display...
+
+
 p <- ggplot(fury, aes(x = Time)) +
         stat_density(fill = "black", alpha = 0.2) +
         expand_limits(y = 0) +
@@ -161,19 +203,3 @@ high_voltage_plot
 
 
 
-
-
-# race_plot <- ggplot(data = race_results, aes(x = Time, y = Chapter, color = Course)) +
-#         geom_point(alpha = 0.25)
-# race_plot
-# 
-# bessel_plot <- ggplot(data = bessel_run, aes(x = Time, y = Chapter, color = Pilot.Handle)) +
-#         geom_point(alpha = 0.25)
-# bessel_plot
-
-# str(bessel_run)
-# summary(bessel_run$Time)
-# sd(bessel_run$Time)
-# sum(bessel_run$Time > 3*sd(bessel_run$Time))
-# plot(bessel_run$Time)
-# hist(bessel_run$Time)

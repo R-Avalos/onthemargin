@@ -257,6 +257,7 @@ server <- function(input,output){
                         geom_vline(xintercept = mean(density_df$Time), color = "dodger blue") +
                         xlab("Time (Seconds)") +
                         scale_x_continuous(limits = c(0, max(race_results$Time))) +
+                        scale_y_continuous(limits = c(0, .14)) +
                         annotation_custom(tableGrob(table_df[,1:3], 
                                                     rows = NULL, 
                                                     theme = ttheme_minimal(

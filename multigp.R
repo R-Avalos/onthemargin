@@ -92,6 +92,14 @@ chapter_race_df$date <- ymd(paste0(chapter_race_df$year, "-",
                                    chapter_race_df$month, "-",
                                    "1")
                             )
+
+# Add filler dates
+df_time <- data.frame(date = seq(min(race_results$Date.Recorded), 
+                                max(race_results$Date.Recorded), 
+                                by="day"))
+summary(df_time)
+chapter_race_df <- merge(x=df_time, y=chapter_race_df, by="date", all.x=T)
+
 head(chapter_race_df)
 summary(chapter_race_df)
 
@@ -100,6 +108,35 @@ summary(chapter_race_df)
 
 ## Chapter Drill Down Plot, Single chapter's Mean Time by Course over time, with SD band along with min and max dashed lines. Select Courses to display...
 
+# Pre-filtered to #TeamBaylands
+teambaylands_df <- chapter_race_df %>%
+        filter(Chapter == "#TeamBaylands")
+summary(teambaylands_df)
+
+plot_ly(data = teambaylands_df, x = ~date, y = ~Mean_Time, color = ~Course,
+        type = "scatter", mode = "lines + markers") %>% 
+        add_lines(x = ~date, y = ~Mean_Time-SD_Time,
+                  line = list(dash = "5px"),
+                  opacity = 0.25,
+                  hoverinfo = "Text", 
+                  text =  "1 Std Dev Below Mean Time"
+                  ) %>%   # Add SD dash line below mean time
+        add_lines(x = ~date, y = ~Mean_Time+SD_Time,
+                  line = list(dash = "5px"),
+                  opacity = 0.25,
+                  hoverinfo = "Text", 
+                  text =  "1 Std Dev Above Mean Time"
+                  ) %>% # Add SD dash line above mean time
+        add_markers(x = ~date, y = ~Mean_Time-SD_Time,
+                    opacity = 0.5,
+                    marker = list(symbol = "square")
+                    ) %>%
+        add_markers(x = ~date, y = ~Mean_Time+SD_Time,
+                    opacity = 0.5,
+                    marker = list(symbol = "square")
+        )
+
+min(teambaylands_df$date[teambaylands_df$Course == "Tsunami"])
 
 p <- ggplot(fury, aes(x = Time)) +
         stat_density(fill = "black", alpha = 0.2) +

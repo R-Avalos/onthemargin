@@ -134,9 +134,14 @@ plot_ly(data = teambaylands_df, x = ~date, y = ~Mean_Time, color = ~Course,
         add_markers(x = ~date, y = ~Mean_Time+SD_Time,
                     opacity = 0.5,
                     marker = list(symbol = "square")
+        ) %>%
+        layout(xaxis = list(title = "", showgrid = F,
+                            tickfont = list(family = "serif", size = 10), ticks = "outside"),
+               yaxis = list(title = "", showgrid = F, tickmode = "array",  
+                            type = "linear", 
+                            ticksuffix  = " secs",
+                            tickfont = list(family = "serif", size = 10), ticks = "outside")
         )
-
-min(teambaylands_df$date[teambaylands_df$Course == "Tsunami"])
 
 p <- ggplot(fury, aes(x = Time)) +
         stat_density(fill = "black", alpha = 0.2) +
@@ -196,47 +201,52 @@ plot_ly(x = fury$Time, type = "histogram", name = "Fury", alpha = 0, color = "re
         
 
 
+#### Create Plot Function for courses
 
-high_voltage_plot <- plot_ly(high_voltage, x = ~Date.Recorded, y = ~Time,
-                     name = "Recorded Race Time",
-                     type = "scatter",
-                     mode = "markers",
-                     hoverinfo = 'text',
-                     text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>", 
-                                    Pilot.Handle, 
-                                    "</b></br>",
-                                    "</br>",
-                                    "<span style='color:grey'>Chapter </span>", 
-                                    Chapter,
-                                    "</br><span style='color:grey'> Time </span>", 
-                                    Time, 
-                                    " secs"),
-                     marker = list(color = 'rgb(0, 66, 37)', opacity = 0.4)
-) %>%
-        add_trace(name = paste0("Mean Race Time ", round(mean(high_voltage$Time), digits = 2), " secs"), 
-                  y = mean(high_voltage$Time), mode = "lines",
-                  line = list(color = "red", opacity = 0.2),
-                  marker = list(opacity = 0)
-        ) %>%
-        add_annotations(
-                text = paste0("Mean Race Time: ", 
-                              round(mean(high_voltage$Time), 2), 
-                              " secs"),
-                x = mean(high_voltage$Date.Recorded),
-                y = mean(high_voltage$Time),
-                yanchor = "bottom",
-                showarrow = FALSE,
-                font = list(color = "red")
-        ) %>%
-        layout(title = "High Voltage Race Results",
-               margin = list(l = 100),
-               hoverlabel = list(font = list(color = "blue"),
-                                 bgcolor = "#f6f6f6",
-                                 bordercolor = "white"),
-               xaxis = list(title = "Recorded Date"),
-               showlegend = FALSE
-        )
-high_voltage_plot
+course_plotfunc <- function(course_df){
+        plot <- plot_ly(data = course_df, x = ~Date.Recorded, y = ~Time,
+                        name = "Recorded Race Time",
+                        type = "scatter",
+                        mode = "markers",
+                        hoverinfo = 'text',
+                        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>", 
+                                       Pilot.Handle, 
+                                       "</b></br>",
+                                       "</br>",
+                                       "<span style='color:grey'>Chapter </span>", 
+                                       Chapter,
+                                       "</br><span style='color:grey'> Time </span>", 
+                                       Time, 
+                                       " secs"),
+                        marker = list(color = 'rgb(0, 66, 37)', opacity = 0.4)
+                        ) %>%
+                add_trace(name = paste0("Mean Race Time ", round(mean(course_df$Time), digits = 2), " secs"), 
+                          y = mean(course_df$Time), mode = "lines",
+                          line = list(color = "red", opacity = 0.2),
+                          marker = list(opacity = 0)
+                ) %>%
+                add_annotations(
+                        text = paste0("Mean Race Time: ", 
+                                      round(mean(course_df$Time), 2), 
+                                      " secs"),
+                        x = mean(course_df$Date.Recorded),
+                        y = mean(course_df$Time),
+                        yanchor = "bottom",
+                        showarrow = FALSE,
+                        font = list(color = "red")
+                ) %>%
+                layout(title = paste0(course_df$Course[1], " Race Results"),
+                       margin = list(l = 100),
+                       hoverlabel = list(font = list(color = "blue"),
+                                         bgcolor = "#f6f6f6",
+                                         bordercolor = "white"),
+                       xaxis = list(title = "Recorded Date"),
+                       showlegend = FALSE
+                )
+        return(plot)
+}
 
+bessel_plot <- course_plotfunc(bessel_results)
+bessel_plot
 
 

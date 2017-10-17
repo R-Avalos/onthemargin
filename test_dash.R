@@ -1,8 +1,7 @@
 # Test Dashabord light framework
 library(shiny)
 library(shinydashboard)
-library(shiny)
-library(dplyr)
+library(gridExtra)
 
 ## Functions
 # googleSearchLink <- function(val) {
@@ -12,16 +11,10 @@ library(dplyr)
 createLink <- function(link, reference) {
         paste0('<a href=', link, ">", reference, "</a>")
 } # pilot link
-
-bessel_results[1,]
-bessel_results$Pilot_link[1]
-bessel_results$Pilot.Handle[1]
-createLink(link = bessel_results$Pilot_link[1], reference = bessel_results$Pilot.Handle[1])
-
-apply(test_df, MARGIN = 1, FUN = function(x) createLink(x['Pilot_link'], x['Pilot.Handle']))
-test_df$url_link <- apply(test_df, MARGIN = 1, FUN = function(x) createLink(x['Pilot_link'], x['Pilot.Handle']))
-
-bessel_results$Pilot_link <- apply(bessel_results, MARGIN = 1, FUN = function(x) createLink(x['Pilot_link'], x['Pilot.Handle']))
+# apply(test_df, MARGIN = 1, FUN = function(x) createLink(x['Pilot_link'], x['Pilot.Handle']))
+# test_df$url_link <- apply(test_df, MARGIN = 1, FUN = function(x) createLink(x['Pilot_link'], x['Pilot.Handle']))
+# 
+# bessel_results$Pilot_link <- apply(bessel_results, MARGIN = 1, FUN = function(x) createLink(x['Pilot_link'], x['Pilot.Handle']))
 
 ### Data
 
@@ -29,9 +22,6 @@ bessel_results$Pilot_link <- apply(bessel_results, MARGIN = 1, FUN = function(x)
 # Density Plot Table Colors
 cols <- matrix("black", nrow(fury_top5), ncol = ncol(fury_top5))
 cols[6, 2:3] <- "dodger blue"
-
-
-
 
 ## Dashboard
 
@@ -55,32 +45,46 @@ ui <- dashboardPage(
                 tabItems(
                         tabItem(tabName = "allcourses",
                                 fluidRow(
-                                        column( width = 3, 
-                                                "Fury Top 5 Pilots",
-                                                tableOutput("fury_top5")
-                                                # box(title = "Test",
-                                                #     height = 2,
-                                                #     width = NULL,
-                                                #     plotlyOutput(outputId = "fury_density")
-                                                #     ),
-                                                # box(tableOutput("fury_top5"))
-                                                ),
-                                        column(width = 3,
-                                               "Bessel Top 5 Pilots",
-                                               tableOutput("bessel_top5")
-                                               ),
-                                        column(width = 3,
-                                               "High Voltage Top 5 Pilots",
-                                               tableOutput("high_top5")
+                                        valueBox(value = prettyNum(summary_df$Course_Count,
+                                                                   big.mark = ","),
+                                                 subtitle = "Courses",
+                                                 width = 3,
+                                                 color = "purple"),
+                                        valueBox(value = prettyNum(summary_df$Active_Pilots,
+                                                                   big.mark = ","),
+                                                 subtitle = "Active Pilots",
+                                                 width = 3,
+                                                 color = "purple"),
+                                        valueBox(value = prettyNum(summary_df$Active_Chapter_Count, big.mark = ","), 
+                                                 subtitle = "Active Chapters",
+                                                 width = 3,
+                                                 color = "purple"),
+                                        valueBox(value = prettyNum(summary_df$Count_Races, 
+                                                                   big.mark = ","),
+                                                 subtitle = "Races",
+                                                 width = 3,
+                                                 color = "purple")
                                         ),
-                                        column(width = 3,
-                                               "Nautilus Top 5 Pilots",
-                                               tableOutput("nautilus_top5")
-                                        )
-                                        # column(width = 6, 
-                                        #        plotlyOutput(outputId = "fury_density"))
-                                            )
+                                fluidRow(
+                                        h2("insert table of all recorded times")
                                 ),
+                                fluidRow(
+                                        valueBox(value = active_pilots$Pilot.Handle[1],
+                                                 subtitle = paste0("Most Active Pilot",
+                                                                   " (",
+                                                                   active_pilots$Races[1],
+                                                                   " races)"),
+                                                 width = 4,
+                                                 color = "black"),
+                                        valueBox(value = active_chapters$Chapter[1],
+                                                 subtitle = paste0("Most Active Chapter",
+                                                                   " (",
+                                                                   active_chapters$Races[1],
+                                                                   " races)"),
+                                                 width = 8,
+                                                 color = "black")
+                                )
+                        ),
                         tabItem(tabName = "bessel",
                                 h2("Bessel Run, Race Times"),
                                 plotlyOutput(outputId = "bessel_run_plot")
@@ -98,8 +102,6 @@ ui <- dashboardPage(
                 )
         )
 )
-
-
 
 server <- function(input,output){
         output$bessel_table <- renderDataTable({bessel_results}, escape = FALSE)

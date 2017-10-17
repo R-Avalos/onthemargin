@@ -90,7 +90,6 @@ top5_results <- rbind(bessel_top5, fury_top5, high_top5, nautilus_top5, tsunami_
 ###################
 
 # Count active chapters
-
 chapter_df <- race_results %>%
         group_by(Chapter) %>%
         summarize(Active_Pilots = length(unique(Pilot.Handle)),
@@ -99,8 +98,6 @@ chapter_df <- race_results %>%
                   First_Race_Date = min(Date.Recorded),
                   Last_Race_Date = max(Date.Recorded)
         )
-head(chapter_df)
-summary(chapter_df)
 
 chapter_race_df <- race_results %>%
         group_by(Chapter, year, month, Course) %>%

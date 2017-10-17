@@ -20,9 +20,34 @@ race_results$year <- year(race_results$Date.Recorded)
 race_results$month <- month(race_results$Date.Recorded)
 
 
-# Subset
-summary(race_results$Course)
+### Subset ####
+##############
 
+
+# Summary data frames
+summary_df <- race_results %>%
+        summarise(Course_Count = n_distinct(Course),
+                  Active_Chapter_Count = n_distinct(Chapter),
+                  Active_Pilots = n_distinct(Pilot.Handle),
+                  Count_Races = n()
+                  )
+
+summary_df
+
+active_pilots <- race_results %>%
+        group_by(Pilot.Handle) %>%
+        summarise(Races = n()) %>%
+        arrange(desc(Races))
+
+active_chapters <- race_results %>%
+        group_by(Chapter) %>%
+        summarise(Races = n()) %>%
+        arrange(desc(Races))
+
+
+
+
+# Subset to unique courses
 bessel_results <- race_results %>% filter(Course == "Bessel Run")
 bessel_run <- race_results %>% filter(Course == "Bessel Run")
 fury <- race_results %>% filter(Course == "Fury")
@@ -65,8 +90,6 @@ top5_results <- rbind(bessel_top5, fury_top5, high_top5, nautilus_top5, tsunami_
 ###################
 
 # Count active chapters
-active_chapters <- unique(race_results$Chapter)
-length(active_chapters)
 
 chapter_df <- race_results %>%
         group_by(Chapter) %>%

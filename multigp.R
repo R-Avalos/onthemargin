@@ -126,6 +126,50 @@ summary(chapter_race_df)
 #### Test plots  ###
 ###################
 
+
+#### Fix All Course Plot
+plot_ly(race_results, x = ~Date.Recorded, y = ~Time, color = ~Course,
+        alpha = 0.75, 
+        type = "scatter",
+        mode = "markers",
+        hoverinfo = 'text',
+        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>", 
+                       Pilot.Handle, 
+                       "</b></br>",
+                       "</br>",
+                       "<span style='color:grey'>Chapter </span>", 
+                       Chapter,
+                       "</br><span style='color:grey'> Course </span>",
+                       Course,
+                       "</br><span style='color:grey'> Time </span>", 
+                       Time, 
+                       " secs")
+) %>%
+        layout(title = "MultiGP Race Results",
+               margin = list(l = 100),
+               hoverlabel = list(font = list(color = "blue"),
+                                 bgcolor = "white",
+                                 bordercolor = "white"),
+               xaxis = list(showgrid = FALSE,
+                            title = "",
+                            tickmode = "array",
+                            type = "marker", 
+                            autorange = TRUE,
+                            tickfont = list(family = "serif", size = 10), 
+                            ticks = "outside"
+                            ),
+               yaxis = list(showgrid = FALSE,
+                            title = "",
+                            tickmode = "array",
+                            type = "marker",
+                            tickvalues = summary(race_results$Time),
+                            ticktext = round(summary(race_results$Time), 1),
+                            tickfont = list(family = "serif", size = 10), 
+                            ticks = "outside"
+                            )
+        )
+min(race_results$Date.Recorded)
+max(race_results$Date.Recorded)
 ## Chapter Drill Down Plot, Single chapter's Mean Time by Course over time, with SD band along with min and max dashed lines. Select Courses to display...
 
 # Pre-filtered to #TeamBaylands

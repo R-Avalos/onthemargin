@@ -66,7 +66,8 @@ ui <- dashboardPage(
                                                  color = "purple")
                                         ),
                                 fluidRow(
-                                        h2("insert table of all recorded times")
+                                        h2("insert table of all recorded times"),
+                                        plotOutput$allcourse_plot
                                 ),
                                 fluidRow(
                                         valueBox(value = active_pilots$Pilot.Handle[1],

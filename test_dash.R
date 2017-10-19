@@ -45,45 +45,71 @@ ui <- dashboardPage(
                 tabItems(
                         tabItem(tabName = "allcourses",
                                 fluidRow(
-                                        valueBox(value = prettyNum(summary_df$Course_Count,
-                                                                   big.mark = ","),
-                                                 subtitle = "Courses",
-                                                 width = 3,
-                                                 color = "purple"),
-                                        valueBox(value = prettyNum(summary_df$Active_Pilots,
-                                                                   big.mark = ","),
-                                                 subtitle = "Active Pilots",
-                                                 width = 3,
-                                                 color = "purple"),
-                                        valueBox(value = prettyNum(summary_df$Active_Chapter_Count, big.mark = ","), 
-                                                 subtitle = "Active Chapters",
-                                                 width = 3,
-                                                 color = "purple"),
-                                        valueBox(value = prettyNum(summary_df$Count_Races, 
-                                                                   big.mark = ","),
-                                                 subtitle = "Races",
-                                                 width = 3,
-                                                 color = "purple")
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(summary_df$Course_Count,
+                                                                 big.mark = ","), 
+                                                       "</strong></span>",
+                                                       "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                       " Courses</span>")
+                                                     )
+                                                ),
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(summary_df$Active_Pilots,
+                                                                                                                                        big.mark = ","), 
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Active Pilots</span>")
+                                                )
                                         ),
-                                fluidRow(
-                                        h2("insert table of all recorded times"),
-                                        plotOutput$allcourse_plot
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(summary_df$Active_Chapter_Count,
+                                                                                                                                        big.mark = ","), 
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Active Chapters</span>")
+                                                )
+                                        ),
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(summary_df$Count_Races,
+                                                                                                                                        big.mark = ","), 
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Races</span>")
+                                                )
+                                        )
                                 ),
                                 fluidRow(
-                                        valueBox(value = active_pilots$Pilot.Handle[1],
-                                                 subtitle = paste0("Most Active Pilot",
-                                                                   " (",
-                                                                   active_pilots$Races[1],
-                                                                   " races)"),
-                                                 width = 4,
-                                                 color = "black"),
-                                        valueBox(value = active_chapters$Chapter[1],
-                                                 subtitle = paste0("Most Active Chapter",
-                                                                   " (",
-                                                                   active_chapters$Races[1],
-                                                                   " races)"),
-                                                 width = 8,
-                                                 color = "black")
+                                        column(
+                                                width = 6,
+                                                HTML(paste0("<p align = 'center'><span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(active_pilots$Pilot.Handle[1],
+                                                                                                                                        big.mark = ","), 
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Most Active Pilot (",
+                                                            active_pilots$Races[1],
+                                                            " races)</span></p>")
+                                                )
+                                        ),
+                                        column(
+                                                width = 6,
+                                                HTML(paste0("<p align = 'center'><span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(active_chapters$Chapter[1],
+                                                                                                                                        big.mark = ","), 
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Most Active Chapter (",
+                                                            active_chapters$Races[1],
+                                                            " races)</span></p>")
+                                                )
+                                        )
+                                        
+                                ),
+                                fluidRow(
+                                        h2("insert table of all recorded times")
+                                        #plotOutput$allcourse_plot
                                 )
                         ),
                         tabItem(tabName = "bessel",
@@ -103,6 +129,7 @@ ui <- dashboardPage(
                 )
         )
 )
+
 
 server <- function(input,output){
         output$bessel_table <- renderDataTable({bessel_results}, escape = FALSE)

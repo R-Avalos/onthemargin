@@ -44,16 +44,9 @@ ui <- dashboardPage(
         dashboardBody(
                 tabItems(
                         tabItem(tabName = "allcourses",
+# HTML summary data ####
                                 fluidRow(
-                                        column(
-                                                width = 3,
-                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(summary_df$Course_Count,
-                                                                 big.mark = ","), 
-                                                       "</strong></span>",
-                                                       "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
-                                                       " Courses</span>")
-                                                     )
-                                                ),
+######
                                         column(
                                                 width = 3,
                                                 HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(summary_df$Active_Pilots,
@@ -80,9 +73,20 @@ ui <- dashboardPage(
                                                             "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
                                                             " Races</span>")
                                                 )
+                                        ),
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(summary_df$Course_Count,
+                                                                                                                                        big.mark = ","), 
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Courses</span>")
+                                                )
                                         )
                                 ),
+# HTML summary data ####
                                 fluidRow(
+######
                                         column(
                                                 width = 6,
                                                 HTML(paste0("<p align = 'center'><span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(active_pilots$Pilot.Handle[1],
@@ -105,10 +109,10 @@ ui <- dashboardPage(
                                                             " races)</span></p>")
                                                 )
                                         )
-                                        
                                 ),
+#######
                                 fluidRow(
-                                        h2("insert table of all recorded times")
+                                        plotlyOutput(outputId = "allcourse_plot")
                                         #plotOutput$allcourse_plot
                                 )
                         ),

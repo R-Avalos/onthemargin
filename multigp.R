@@ -139,14 +139,16 @@ plot_ly(race_results, x = ~Date.Recorded, y = ~Time, color = ~Course,
                        "</br>",
                        "<span style='color:grey'>Chapter </span>", 
                        Chapter,
-                       "</br><span style='color:grey'> Course </span>",
+                       "</br><span style='color:grey'>Course </span>",
                        Course,
-                       "</br><span style='color:grey'> Time </span>", 
+                       "</br><span style='color:grey'>Time </span>", 
                        Time, 
                        " secs")
 ) %>%
-        layout(title = "MultiGP Race Results",
-               margin = list(l = 100),
+        layout(title = "",
+               paper_bgcolor = "transparent",
+               plot_bgcolor = "transparent",
+               margin = list(r = 20),
                hoverlabel = list(font = list(color = "blue"),
                                  bgcolor = "white",
                                  bordercolor = "white"),
@@ -159,15 +161,35 @@ plot_ly(race_results, x = ~Date.Recorded, y = ~Time, color = ~Course,
                             ticks = "outside"
                             ),
                yaxis = list(showgrid = FALSE,
+                            range = c(0, max(race_results$Time)+5),
                             title = "",
                             tickmode = "array",
                             type = "marker",
                             tickvalues = summary(race_results$Time),
+                            ticksuffix = " secs",
                             ticktext = round(summary(race_results$Time), 1),
                             tickfont = list(family = "serif", size = 10), 
-                            ticks = "outside"
-                            )
+                            ticks = "outside",
+                            zeroline = TRUE,
+                            zerolinecolor = toRGB("light grey")
+                            ),
+               annotations = list(
+                       list(xref = "x", yref = "y", 
+                            x = ymd("2016-2-15"),
+                            y = max(race_results$Time)-5,
+                            text = "<b>MultiGP Drone Racing </b><br> Individual Pilot Times <br> by Course",
+                            showarrow = FALSE,
+                            align = "left")
+               ),
+               shapes=list(type='line', 
+                           x0= min(race_results$Date.Recorded), 
+                           x1= max(race_results$Date.Recorded), 
+                           y0= min(race_results$Time), 
+                           y1= min(race_results$Time), 
+                           line=list(dash='dot', width=1, color = "grey"))
         )
+
+
 min(race_results$Date.Recorded)
 max(race_results$Date.Recorded)
 ## Chapter Drill Down Plot, Single chapter's Mean Time by Course over time, with SD band along with min and max dashed lines. Select Courses to display...

@@ -89,7 +89,7 @@ ui <- dashboardPage(
 ######
                                         column(
                                                 width = 6,
-                                                HTML(paste0("<p align = 'center'><span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(active_pilots$Pilot.Handle[1],
+                                                HTML(paste0("<p align = 'left'><span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(active_pilots$Pilot.Handle[1],
                                                                                                                                         big.mark = ","), 
                                                             "</strong></span>",
                                                             "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
@@ -100,7 +100,7 @@ ui <- dashboardPage(
                                         ),
                                         column(
                                                 width = 6,
-                                                HTML(paste0("<p align = 'center'><span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(active_chapters$Chapter[1],
+                                                HTML(paste0("<p align = 'left'><span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(active_chapters$Chapter[1],
                                                                                                                                         big.mark = ","), 
                                                             "</strong></span>",
                                                             "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
@@ -149,18 +149,48 @@ server <- function(input,output){
                                        "</br>",
                                        "<span style='color:grey'>Chapter </span>", 
                                        Chapter,
-                                       "</br><span style='color:grey'> Course </span>",
+                                       "</br><span style='color:grey'>Course </span>",
                                        Course,
-                                       "</br><span style='color:grey'> Time </span>", 
+                                       "</br><span style='color:grey'>Time </span>", 
                                        Time, 
                                        " secs")
                 ) %>%
-                        layout(title = "MultiGP Race Results",
-                               margin = list(l = 100),
+                        layout(title = "",
+                               paper_bgcolor = "transparent",
+                               plot_bgcolor = "transparent",
+                               margin = list(r = 20),
                                hoverlabel = list(font = list(color = "blue"),
                                                  bgcolor = "white",
                                                  bordercolor = "white"),
-                               xaxis = list(title = "Recorded Date")
+                               xaxis = list(showgrid = FALSE,
+                                            title = "",
+                                            tickmode = "array",
+                                            type = "marker", 
+                                            autorange = TRUE,
+                                            tickfont = list(family = "serif", size = 10), 
+                                            ticks = "outside"
+                               ),
+                               yaxis = list(showgrid = FALSE,
+                                            range = c(0, max(race_results$Time)+5),
+                                            title = "",
+                                            tickmode = "array",
+                                            type = "marker",
+                                            tickvalues = summary(race_results$Time),
+                                            ticksuffix = " secs",
+                                            ticktext = round(summary(race_results$Time), 1),
+                                            tickfont = list(family = "serif", size = 10), 
+                                            ticks = "outside",
+                                            zeroline = FALSE,
+                                            zerolinecolor = toRGB("light grey")
+                               ),
+                               annotations = list(
+                                       list(xref = "x", yref = "y", 
+                                            x = ymd("2016-2-15"),
+                                            y = max(race_results$Time)-5,
+                                            text = "<b>MultiGP Drone Racing </b><br> Individual Pilot Times <br> by Course",
+                                            showarrow = FALSE,
+                                            align = "left")
+                               )
                         )
                 
         })
@@ -176,9 +206,9 @@ server <- function(input,output){
                                        "</br>",
                                        "<span style='color:grey'>Chapter </span>", 
                                        Chapter,
-                                       "</br><span style='color:grey'> Time </span>", 
+                                       "</br><span style='color:grey'>Time </span>", 
                                        Time, 
-                                       " secs"),
+                                       "secs "),
                         marker = list(color = 'rgb(0, 66, 37)', opacity = 0.4)
                 ) %>%
                         add_trace(name = paste0("Mean Race Time ", round(mean(bessel_run$Time), digits = 2), " secs"), 
@@ -218,9 +248,9 @@ server <- function(input,output){
                                        "</br>",
                                        "<span style='color:grey'>Chapter </span>", 
                                        Chapter,
-                                       "</br><span style='color:grey'> Time </span>", 
+                                       "</br><span style='color:grey'>Time </span>", 
                                        Time, 
-                                       " secs"),
+                                       "secs "),
                         marker = list(color = 'rgb(0, 66, 37)', opacity = 0.4)
                 ) %>%
                         add_trace(name = paste0("Mean Race Time ", round(mean(fury$Time), digits = 2), " secs"), 

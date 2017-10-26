@@ -128,13 +128,17 @@ summary(chapter_race_df)
 ###################
 display.brewer.all(5)
 
+
 ### Chapter Plot
 # Subset to individual chapters
 # Don't forget chapter_race df
-summary(race_results$Chapter)
 chapter_df <- race_results %>%
         filter(Chapter == "Maryland Quad Racers")
+# Don't Delete 
+chapter_choice <- active_chapters[with(active_chapters, order(Chapter)),]
+chapter_choice <- chapter_choice$Chapter       
 
+#
 plot_ly(chapter_df, x = ~Date.Recorded, color = I(~Course),
         opacity = 0.75,
         colors = brewer.pal(6, "Dark2"),
@@ -164,7 +168,10 @@ plot_ly(chapter_df, x = ~Date.Recorded, color = I(~Course),
                             title = "",
                             tickmode = "array",
                             type = "marker",
-                            autorange = TRUE,
+                            range = c(min(race_results$Date.Recorded)-30,
+                                      max(race_results$Date.Recorded)
+                            ),
+                            autorange = FALSE,
                             tickfont = list(family = "serif", size = 10),
                             ticks = "outside"
                             ),
@@ -196,7 +203,7 @@ plot_ly(chapter_df, x = ~Date.Recorded, color = I(~Course),
                             align = "left")
                ),
                shapes=list(type='line',
-                           x0= min(race_results$Date.Recorded),
+                           x0= min(race_results$Date.Recorded-30),
                            x1= max(race_results$Date.Recorded),
                            y0= min(race_results$Time),
                            y1= min(race_results$Time),

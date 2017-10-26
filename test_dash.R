@@ -32,8 +32,8 @@ ui <- dashboardPage(
                 sidebarMenu(
                         menuItem(text = "All Courses",
                                  tabName= "allcourses"),
-                        menuItem(text = "Bessel Run", 
-                                 tabName = "bessel"
+                        menuItem(text = "Chapters", 
+                                 tabName = "chapters"
                                  ),
                         menuItem(text = "Bessel Table",
                                  tabName = "bessel_table"),
@@ -116,9 +116,13 @@ ui <- dashboardPage(
                                         #plotOutput$allcourse_plot
                                 )
                         ),
-                        tabItem(tabName = "bessel",
-                                h2("Bessel Run, Race Times"),
-                                plotlyOutput(outputId = "bessel_run_plot")
+                        tabItem(tabName = "chapters",
+                                h2("Chapters Page"),
+                                selectInput(inputId = "chapter_select", 
+                                            label = "Chapter", 
+                                            choices = chapter_choice, 
+                                            selected = active_chapters$Chapter[active_chapters$Races == max(active_chapters$Races)]),
+                                plotlyOutput(outputId = "chapter_plot")
                                 ),
                         tabItem(tabName = "bessel_table",
                                 h2("Bessel Run, Table of Results"),
@@ -306,7 +310,89 @@ server <- function(input,output){
                         layout(annotations = fury_avg_text)
         })
         
+        ### Reactive Chapter Plot
+        chapter_df <- reactive({
+                race_results %>% filter(Chapter == input$chapter_select)
+        })
+        
+        output$chapter_plot <- renderPlotly({
                 
+                chapter_data <- chapter_df()
+                chap_plot <- plot_ly(chapter_data, x = ~Date.Recorded, color = I(~Course),
+                        opacity = 0.75,
+                        colors = brewer.pal(6, "Dark2"),
+                        hoverinfo = 'text',
+                        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>",
+                                       Pilot.Handle,
+                                       "</b></br>",
+                                       "</br><span style='color:grey'>Course </span>",
+                                       Course,
+                                       "</br><span style='color:grey'>Time </span>",
+                                       Time,
+                                       " secs")
+                ) %>%
+                        add_markers(y = ~Time) %>%
+                        add_lines(y = ~fitted(loess(Time ~ as.numeric(Date.Recorded))),
+                                  line = list(colors = "Set1"),
+                                  opacity = 0.5,
+                                  name = "Loess Smoother", showlegend = FALSE) %>%
+                        layout(title = "",
+                               paper_bgcolor = "transparent",
+                               plot_bgcolor = "transparent",
+                               margin = list(r = 20),
+                               hoverlabel = list(font = list(color = "blue"),
+                                                 bgcolor = "white",
+                                                 bordercolor = "white"),
+                               xaxis = list(showgrid = FALSE,
+                                            title = "",
+                                            tickmode = "array",
+                                            type = "marker",
+                                            range = c(min(race_results$Date.Recorded)-30,
+                                                      max(race_results$Date.Recorded)
+                                            ),
+                                            autorange = FALSE,
+                                            tickfont = list(family = "serif", size = 10),
+                                            ticks = "outside"
+                               ),
+                               yaxis = list(showgrid = FALSE,
+                                            range = c(0, max(race_results$Time)+5),
+                                            title = "",
+                                            tickmode = "array",
+                                            type = "marker",
+                                            tickvalues = summary(race_results$Time),
+                                            ticksuffix = " secs",
+                                            ticktext = round(summary(race_results$Time), 1),
+                                            tickfont = list(family = "serif", size = 10),
+                                            ticks = "outside",
+                                            zeroline = TRUE,
+                                            zerolinecolor = toRGB("light grey")
+                               ),
+                               annotations = list(
+                                       list(xref = "x", yref = "y",
+                                            x = ymd("2016-2-15"),
+                                            y = max(race_results$Time)-5,
+                                            text = paste0("<b><span style='color:blue'>",
+                                                          chapter_data$Chapter[1], 
+                                                          "</span></b><br>",
+                                                          "Individual Pilot Times by Course<br>",
+                                                          length(unique(chapter_data$Pilot.Handle)),
+                                                          " Active Pilots<br>"
+                                            ),
+                                            showarrow = FALSE,
+                                            align = "left")
+                               ),
+                               shapes=list(type='line',
+                                           x0= min(race_results$Date.Recorded-30),
+                                           x1= max(race_results$Date.Recorded),
+                                           y0= min(race_results$Time),
+                                           y1= min(race_results$Time),
+                                           line=list(dash='dot', width=1, color = "grey"))
+                        )
+                print(chap_plot)
+                
+        })
+                
+        
         ### Reactive Density Plot with Table Overlay
         top5_data <- reactive({
                 top5_results %>% filter(Course == input$course_top5)

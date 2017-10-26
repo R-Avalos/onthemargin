@@ -137,9 +137,11 @@ ui <- dashboardPage(
 
 server <- function(input,output){
         output$bessel_table <- renderDataTable({bessel_results}, escape = FALSE)
+        
         output$allcourse_plot <- renderPlotly({
                 plot_ly(race_results, x = ~Date.Recorded, y = ~Time, color = ~Course,
-                        alpha = 0.75, 
+                        opacity = 0.75,
+                        colors = brewer.pal(6, "Dark2"),
                         type = "scatter",
                         mode = "markers",
                         hoverinfo = 'text',
@@ -165,8 +167,11 @@ server <- function(input,output){
                                xaxis = list(showgrid = FALSE,
                                             title = "",
                                             tickmode = "array",
-                                            type = "marker", 
-                                            autorange = TRUE,
+                                            type = "marker",
+                                            range = c(min(race_results$Date.Recorded)-30,
+                                                      max(race_results$Date.Recorded)
+                                                      ),
+                                            autorange = FALSE,
                                             tickfont = list(family = "serif", size = 10), 
                                             ticks = "outside"
                                ),
@@ -338,9 +343,6 @@ server <- function(input,output){
                 print(p)
                 
         })
-        
-        
-        
 }
 
 shinyApp(ui, server) #preview dashboard

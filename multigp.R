@@ -5,6 +5,7 @@ library(stringr)
 library(ggplot2)
 library(ggthemes)
 library(plotly)
+library(RColorBrewer)
 
 # Load and Trasnsform Data
 race_results <- read.csv(file = "multigp_course_times.csv", header = T, stringsAsFactors = F)
@@ -125,26 +126,33 @@ summary(chapter_race_df)
 
 #### Test plots  ###
 ###################
+display.brewer.all(5)
 
+### Chapter Plot
+# Subset to individual chapters
+# Don't forget chapter_race df
+summary(race_results$Chapter)
+chapter_df <- race_results %>%
+        filter(Chapter == "Maryland Quad Racers")
 
-#### Fix All Course Plot
-plot_ly(race_results, x = ~Date.Recorded, y = ~Time, color = ~Course,
-        alpha = 0.75, 
-        type = "scatter",
-        mode = "markers",
+plot_ly(chapter_df, x = ~Date.Recorded, color = I(~Course),
+        opacity = 0.75,
+        colors = brewer.pal(6, "Dark2"),
         hoverinfo = 'text',
-        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>", 
-                       Pilot.Handle, 
+        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>",
+                       Pilot.Handle,
                        "</b></br>",
-                       "</br>",
-                       "<span style='color:grey'>Chapter </span>", 
-                       Chapter,
                        "</br><span style='color:grey'>Course </span>",
                        Course,
-                       "</br><span style='color:grey'>Time </span>", 
-                       Time, 
+                       "</br><span style='color:grey'>Time </span>",
+                       Time,
                        " secs")
-) %>%
+        ) %>%
+        add_markers(y = ~Time) %>%
+        add_lines(y = ~fitted(loess(Time ~ as.numeric(Date.Recorded))),
+                  line = list(colors = "Set1"),
+                  opacity = 0.5,
+                  name = "Loess Smoother", showlegend = TRUE) %>%
         layout(title = "",
                paper_bgcolor = "transparent",
                plot_bgcolor = "transparent",
@@ -155,9 +163,9 @@ plot_ly(race_results, x = ~Date.Recorded, y = ~Time, color = ~Course,
                xaxis = list(showgrid = FALSE,
                             title = "",
                             tickmode = "array",
-                            type = "marker", 
+                            type = "marker",
                             autorange = TRUE,
-                            tickfont = list(family = "serif", size = 10), 
+                            tickfont = list(family = "serif", size = 10),
                             ticks = "outside"
                             ),
                yaxis = list(showgrid = FALSE,
@@ -168,26 +176,98 @@ plot_ly(race_results, x = ~Date.Recorded, y = ~Time, color = ~Course,
                             tickvalues = summary(race_results$Time),
                             ticksuffix = " secs",
                             ticktext = round(summary(race_results$Time), 1),
-                            tickfont = list(family = "serif", size = 10), 
+                            tickfont = list(family = "serif", size = 10),
                             ticks = "outside",
                             zeroline = TRUE,
                             zerolinecolor = toRGB("light grey")
                             ),
                annotations = list(
-                       list(xref = "x", yref = "y", 
+                       list(xref = "x", yref = "y",
                             x = ymd("2016-2-15"),
                             y = max(race_results$Time)-5,
-                            text = "<b>MultiGP Drone Racing </b><br> Individual Pilot Times <br> by Course",
+                            text = paste0("<b><span style='color:blue'>",
+                                          chapter_df$Chapter[1], 
+                                          "</span></b><br>",
+                                          "Individual Pilot Times by Course<br>",
+                                          length(unique(chapter_df$Pilot.Handle)),
+                                          " Active Pilots<br>"
+                                          ),
                             showarrow = FALSE,
                             align = "left")
                ),
-               shapes=list(type='line', 
-                           x0= min(race_results$Date.Recorded), 
-                           x1= max(race_results$Date.Recorded), 
-                           y0= min(race_results$Time), 
-                           y1= min(race_results$Time), 
+               shapes=list(type='line',
+                           x0= min(race_results$Date.Recorded),
+                           x1= max(race_results$Date.Recorded),
+                           y0= min(race_results$Time),
+                           y1= min(race_results$Time),
                            line=list(dash='dot', width=1, color = "grey"))
         )
+
+                
+# Add mean plot over time
+
+
+#### Fix All Course Plot
+# plot_ly(race_results, x = ~Date.Recorded, y = ~Time, color = ~Course,
+#         alpha = 0.75, 
+#         type = "scatter",
+#         mode = "markers",
+#         hoverinfo = 'text',
+#         text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>", 
+#                        Pilot.Handle, 
+#                        "</b></br>",
+#                        "</br>",
+#                        "<span style='color:grey'>Chapter </span>", 
+#                        Chapter,
+#                        "</br><span style='color:grey'>Course </span>",
+#                        Course,
+#                        "</br><span style='color:grey'>Time </span>", 
+#                        Time, 
+#                        " secs")
+# ) %>%
+#         layout(title = "",
+#                paper_bgcolor = "transparent",
+#                plot_bgcolor = "transparent",
+#                margin = list(r = 20),
+#                hoverlabel = list(font = list(color = "blue"),
+#                                  bgcolor = "white",
+#                                  bordercolor = "white"),
+#                xaxis = list(showgrid = FALSE,
+#                             title = "",
+#                             tickmode = "array",
+#                             type = "marker", 
+#                             autorange = TRUE,
+#                             tickfont = list(family = "serif", size = 10), 
+#                             ticks = "outside"
+#                             ),
+#                yaxis = list(showgrid = FALSE,
+#                             range = c(0, max(race_results$Time)+5),
+#                             title = "",
+#                             tickmode = "array",
+#                             type = "marker",
+#                             tickvalues = summary(race_results$Time),
+#                             ticksuffix = " secs",
+#                             ticktext = round(summary(race_results$Time), 1),
+#                             tickfont = list(family = "serif", size = 10), 
+#                             ticks = "outside",
+#                             zeroline = TRUE,
+#                             zerolinecolor = toRGB("light grey")
+#                             ),
+#                annotations = list(
+#                        list(xref = "x", yref = "y", 
+#                             x = ymd("2016-2-15"),
+#                             y = max(race_results$Time)-5,
+#                             text = "<b>MultiGP Drone Racing </b><br> Individual Pilot Times <br> by Course",
+#                             showarrow = FALSE,
+#                             align = "left")
+#                ),
+#                shapes=list(type='line', 
+#                            x0= min(race_results$Date.Recorded), 
+#                            x1= max(race_results$Date.Recorded), 
+#                            y0= min(race_results$Time), 
+#                            y1= min(race_results$Time), 
+#                            line=list(dash='dot', width=1, color = "grey"))
+#         )
 
 
 min(race_results$Date.Recorded)

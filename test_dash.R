@@ -122,7 +122,9 @@ ui <- dashboardPage(
                                             label = "Chapter", 
                                             choices = chapter_choice, 
                                             selected = active_chapters$Chapter[active_chapters$Races == max(active_chapters$Races)]),
-                                plotlyOutput(outputId = "chapter_plot")
+                                plotlyOutput(outputId = "chapter_plot"),
+                                h4("bumper"),
+                                dataTableOutput(outputId = "chp_table")
                                 ),
                         tabItem(tabName = "bessel_table",
                                 h2("Bessel Run, Table of Results"),
@@ -137,7 +139,6 @@ ui <- dashboardPage(
                 )
         )
 )
-
 
 server <- function(input,output){
         output$bessel_table <- renderDataTable({bessel_results}, escape = FALSE)
@@ -203,6 +204,11 @@ server <- function(input,output){
                         )
                 
         })
+        
+# Chapter Tab
+        output$chp_table <- renderDataTable({chapter_summary_df},escape = FALSE)
+
+# Bessel Tab
         output$bessel_run_plot <- renderPlotly({
                 plot_ly(bessel_run, x = ~Date.Recorded, y = ~Time,
                         name = "Recorded Race Time",

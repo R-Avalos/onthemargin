@@ -91,7 +91,7 @@ top5_results <- rbind(bessel_top5, fury_top5, high_top5, nautilus_top5, tsunami_
 ###################
 
 # Count active chapters
-chapter_df <- race_results %>%
+chapter_summary_df <- race_results %>%
         group_by(Chapter) %>%
         summarize(Active_Pilots = length(unique(Pilot.Handle)),
                   Races = length(Time),
@@ -121,8 +121,11 @@ df_time <- data.frame(date = seq(min(race_results$Date.Recorded),
 summary(df_time)
 chapter_race_df <- merge(x=df_time, y=chapter_race_df, by="date", all.x=T)
 
-head(chapter_race_df)
-summary(chapter_race_df)
+# Selection string for plot input
+chapter_choice <- active_chapters[with(active_chapters, order(Chapter)),]
+chapter_choice <- chapter_choice$Chapter       
+
+
 
 #### Test plots  ###
 ###################
@@ -134,11 +137,7 @@ display.brewer.all(5)
 # Don't forget chapter_race df
 chapter_df <- race_results %>%
         filter(Chapter == "Maryland Quad Racers")
-# Don't Delete 
-chapter_choice <- active_chapters[with(active_chapters, order(Chapter)),]
-chapter_choice <- chapter_choice$Chapter       
 
-#
 plot_ly(chapter_df, x = ~Date.Recorded, color = I(~Course),
         opacity = 0.75,
         colors = brewer.pal(6, "Dark2"),

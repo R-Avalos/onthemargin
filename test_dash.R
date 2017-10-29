@@ -124,8 +124,7 @@ ui <- dashboardPage(
                                             choices = chapter_choice, 
                                             selected = active_chapters$Chapter[active_chapters$Races == max(active_chapters$Races)]),
                                 plotlyOutput(outputId = "chapter_plot"),
-                                h4("bumper"),
-                                T::dataTableOutput(outputId = "chp_table")
+                                DT::dataTableOutput(outputId = "chp_table")
                                 ),
                         tabItem(tabName = "bessel_table",
                                 h2("Bessel Run, Table of Results"),
@@ -209,7 +208,13 @@ server <- function(input,output){
         })
         
 # Chapter Tab
-        output$chp_table <- DT::renderDataTable({chapter_summary_df}, escape = FALSE)
+        output$chp_table <- DT::renderDataTable({chapter_summary_df},
+                                                rownames = FALSE,
+                                                escape = FALSE,
+                                                options = list(lengthMenu = c(5, 30, 50), 
+                                                               pageLength = 5,
+                                                               order = list(list(2, 'desc')))
+                                                )
 
 # Bessel Tab
         output$bessel_run_plot <- renderPlotly({

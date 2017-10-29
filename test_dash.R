@@ -1,5 +1,6 @@
 # Test Dashabord light framework
 library(shiny)
+library(DT)
 library(shinydashboard)
 library(gridExtra)
 
@@ -124,7 +125,7 @@ ui <- dashboardPage(
                                             selected = active_chapters$Chapter[active_chapters$Races == max(active_chapters$Races)]),
                                 plotlyOutput(outputId = "chapter_plot"),
                                 h4("bumper"),
-                                dataTableOutput(outputId = "chp_table")
+                                T::dataTableOutput(outputId = "chp_table")
                                 ),
                         tabItem(tabName = "bessel_table",
                                 h2("Bessel Run, Table of Results"),
@@ -139,6 +140,8 @@ ui <- dashboardPage(
                 )
         )
 )
+
+
 
 server <- function(input,output){
         output$bessel_table <- renderDataTable({bessel_results}, escape = FALSE)
@@ -206,7 +209,7 @@ server <- function(input,output){
         })
         
 # Chapter Tab
-        output$chp_table <- renderDataTable({chapter_summary_df},escape = FALSE)
+        output$chp_table <- DT::renderDataTable({chapter_summary_df}, escape = FALSE)
 
 # Bessel Tab
         output$bessel_run_plot <- renderPlotly({

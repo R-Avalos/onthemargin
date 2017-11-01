@@ -99,6 +99,7 @@ chapter_summary_df <- race_results %>%
                   First_Race_Date = min(Date.Recorded),
                   Last_Race_Date = max(Date.Recorded)
         )
+chapter_summary_df$duration_active_days <- as.numeric(chapter_summary_df$Last_Race_Date-chapter_summary_df$First_Race_Date)+1
 
 chapter_race_df <- race_results %>%
         group_by(Chapter, year, month, Course) %>%
@@ -130,6 +131,14 @@ chapter_choice <- chapter_choice$Chapter
 #### Test plots  ###
 ###################
 display.brewer.all(5)
+
+chapter_summary_df$First_Race_Date
+test_df_chaptersbydate <- chapter_summary_df %>%
+        group_by(First_Race_Date) %>%
+        summarize(count_start = n)
+
+# Pilot Data 
+        
 
 
 ### Chapter Plot

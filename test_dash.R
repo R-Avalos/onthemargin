@@ -118,7 +118,42 @@ ui <- dashboardPage(
                                 )
                         ),
                         tabItem(tabName = "chapters",
-                                h2("Chapters Page"),
+                                h2("Chapters"),
+                                fluidRow(
+                                        ######
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(nrow(chapter_summary_df), big.mark = ","), 
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Active</span>")
+                                                )
+                                        ),
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(round(mean(chapter_summary_df$Active_Pilots),2), big.mark = ","), 
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Avg Active Pilots </span>")
+                                                )
+                                        ),
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(round(mean(chapter_summary_df$Races),2), big.mark = ","),
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Avg Race Count</span>")
+                                                )
+                                        ),
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(round(mean(chapter_summary_df$duration_active_days),2), big.mark = ","), 
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Avg Days Active</span>")
+                                                )
+                                        )
+                                ),
                                 selectInput(inputId = "chapter_select", 
                                             label = "Chapter", 
                                             choices = chapter_choice, 

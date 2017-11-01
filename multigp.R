@@ -101,6 +101,14 @@ chapter_summary_df <- race_results %>%
         )
 chapter_summary_df$duration_active_days <- as.numeric(chapter_summary_df$Last_Race_Date-chapter_summary_df$First_Race_Date)+1
 
+# DF of Chapter counts by their first active date
+chapter_count_df <- chapter_summary_df %>%
+        group_by(First_Race_Date) %>%
+        summarize(count_start = n())
+chapter_count_df$cumulative <- cumsum(chapter_count_df$count_start)
+
+
+### Check this dataframe to see if still needed
 chapter_race_df <- race_results %>%
         group_by(Chapter, year, month, Course) %>%
         summarize(Races = length(Time),
@@ -132,10 +140,6 @@ chapter_choice <- chapter_choice$Chapter
 ###################
 display.brewer.all(5)
 
-chapter_summary_df$First_Race_Date
-test_df_chaptersbydate <- chapter_summary_df %>%
-        group_by(First_Race_Date) %>%
-        summarize(count_start = n)
 
 # Pilot Data 
         

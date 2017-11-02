@@ -118,7 +118,6 @@ ui <- dashboardPage(
                                 )
                         ),
                         tabItem(tabName = "chapters",
-                                h2("Chapters"),
                                 fluidRow(
                                         ######
                                         column(
@@ -150,12 +149,13 @@ ui <- dashboardPage(
                                                 HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(round(mean(chapter_summary_df$duration_active_days),2), big.mark = ","), 
                                                             "</strong></span>",
                                                             "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
-                                                            " Avg Days Active</span>")
+                                                            " Avg Chapter Age</span>")
                                                 )
                                         )
                                 ),
+                                plotlyOutput(outputId = "chp_count"),
                                 selectInput(inputId = "chapter_select", 
-                                            label = "Chapter", 
+                                            label = "Select Chapter", 
                                             choices = chapter_choice, 
                                             selected = active_chapters$Chapter[active_chapters$Races == max(active_chapters$Races)]),
                                 plotlyOutput(outputId = "chapter_plot"),
@@ -243,6 +243,64 @@ server <- function(input,output){
         })
         
 # Chapter Tab
+        output$chp_count <- renderPlotly({
+                plot_ly(chapter_count_df) %>%
+                        add_trace(x = ~date, y = ~cumulative, 
+                                  type = "scatter",
+                                  mode = "lines",
+                                  line = list(color = "grey"),
+                                  hoverinfo = 'text',
+                                  text = ~paste0("<span style='color:grey'>Count Active Chapters </span><b>",
+                                                 cumulative,
+                                                 "</b></br>",
+                                                 "</br>",
+                                                 "<span style='color:grey'>Date </span>",
+                                                 date
+                                  )
+                        ) %>%
+                        add_trace(x = ~date, y = ~count_start, name = "Newly Active Chapters",
+                                  type = "bar",
+                                  marker = list(color = "black"),
+                                  text = ~paste0("<span style='color:grey'>Newly Active Chapters </span><b>",
+                                                 count_start,
+                                                 "</b></br>"
+                                  )
+                        ) %>%
+                        layout(title = "",
+                               paper_bgcolor = "transparent",
+                               plot_bgcolor = "transparent",
+                               margin = list(r = 20),
+                               hoverlabel = list(font = list(color = "blue"),
+                                                 bgcolor = "white",
+                                                 bordercolor = "white"),
+                               showlegend = FALSE,
+                               xaxis = list(showgrid = FALSE,
+                                            title = "",
+                                            tickmode = "array",
+                                            type = "marker",
+                                            autorange = TRUE,
+                                            tickfont = list(family = "serif", size = 10),
+                                            ticks = "outside"
+                               ),
+                               yaxis = list(showgrid = FALSE,
+                                            range = c(0, max(chapter_count_df$cumulative)+5),
+                                            title = "",
+                                            tickmode = "array",
+                                            type = "marker",
+                                            tickfont = list(family = "serif", size = 10),
+                                            ticks = "outside",
+                                            zeroline = FALSE
+                               ),
+                               annotations = list(
+                                       list(xref = "x", yref = "y",
+                                            x = ymd("2016-2-15"),
+                                            y = max(chapter_count_df$cumulative)-5,
+                                            text = "<b>MultiGP Drone Racing </b><br> Running Total, Active Chapters",
+                                            showarrow = FALSE,
+                                            align = "left")
+                               )
+                        )
+                })
         output$chp_table <- DT::renderDataTable({chapter_summary_df},
                                                 rownames = FALSE,
                                                 escape = FALSE,

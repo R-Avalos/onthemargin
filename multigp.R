@@ -96,17 +96,27 @@ chapter_summary_df <- race_results %>%
         summarize(Active_Pilots = length(unique(Pilot.Handle)),
                   Races = length(Time),
                   Unique_Tracks_Raced = length(unique(as.character(Course))),
-                  First_Race_Date = min(Date.Recorded),
+                  date = min(Date.Recorded),
                   Last_Race_Date = max(Date.Recorded)
         )
-chapter_summary_df$duration_active_days <- as.numeric(chapter_summary_df$Last_Race_Date-chapter_summary_df$First_Race_Date)+1
+chapter_summary_df$duration_active_days <- as.numeric(chapter_summary_df$Last_Race_Date-chapter_summary_df$date)+1
 
 # DF of Chapter counts by their first active date
+df_time <- data.frame(date = seq(min(race_results$Date.Recorded), 
+                                 max(race_results$Date.Recorded), 
+                                 by="day"))
+
 chapter_count_df <- chapter_summary_df %>%
         group_by(First_Race_Date) %>%
         summarize(count_start = n())
+colnames(chapter_count_df)[1] <- "date"
+
+chapter_count_df <- merge(x = df_time, y = chapter_count_df, by = "date", all.x =T)
+chapter_count_df[is.na(chapter_count_df)] <- 0
+
 chapter_count_df$cumulative <- cumsum(chapter_count_df$count_start)
-plot(chapter_count_df$First_Race_Date, chapter_count_df$count_start)
+
+
 
 # What is the first race most chapters participat in?
 
@@ -149,25 +159,25 @@ display.brewer.all(5)
 
 
 ### Chapter Plots
-ggplot(chapter_count_df, aes(x = First_Race_Date, y = cumulative)) +
+ggplot(chapter_count_df, aes(x = date, y = cumulative)) +
         geom_line()
 plot_ly(chapter_count_df) %>%
-        add_trace(x = ~First_Race_Date, y = ~cumulative, 
-                  alpha = 0.75,
+        add_trace(x = ~date, y = ~cumulative, 
                   type = "scatter",
                   mode = "lines",
+                  line = list(color = "grey"),
                   hoverinfo = 'text',
                   text = ~paste0("<span style='color:grey'>Count Active Chapters </span><b>",
                                  cumulative,
                                  "</b></br>",
                                  "</br>",
                                  "<span style='color:grey'>Date </span>",
-                                 First_Race_Date
+                                 date
                                  )
                   ) %>%
-        add_trace(x = ~First_Race_Date, y = ~count_start, name = "Newly Active Chapters",
+        add_trace(x = ~date, y = ~count_start, name = "Newly Active Chapters",
                   type = "bar",
-                  marker = list(color = "rgba(0, 0, 0, 0.85)"),
+                  marker = list(color = "black"),
                   text = ~paste0("<span style='color:grey'>Newly Active Chapters </span><b>",
                                  count_start,
                                  "</b></br>"
@@ -196,8 +206,7 @@ plot_ly(chapter_count_df) %>%
                             type = "marker",
                             tickfont = list(family = "serif", size = 10),
                             ticks = "outside",
-                            zeroline = TRUE,
-                            zerolinecolor = toRGB("light grey")
+                            zeroline = FALSE
                             ),
                annotations = list(
                        list(xref = "x", yref = "y",

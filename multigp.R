@@ -106,6 +106,10 @@ chapter_count_df <- chapter_summary_df %>%
         group_by(First_Race_Date) %>%
         summarize(count_start = n())
 chapter_count_df$cumulative <- cumsum(chapter_count_df$count_start)
+plot(chapter_count_df$First_Race_Date, chapter_count_df$count_start)
+
+# What is the first race most chapters participat in?
+
 
 
 ### Check this dataframe to see if still needed
@@ -141,11 +145,71 @@ chapter_choice <- chapter_choice$Chapter
 display.brewer.all(5)
 
 
-# Pilot Data 
-        
+# Pilot plots
 
 
-### Chapter Plot
+### Chapter Plots
+ggplot(chapter_count_df, aes(x = First_Race_Date, y = cumulative)) +
+        geom_line()
+plot_ly(chapter_count_df) %>%
+        add_trace(x = ~First_Race_Date, y = ~cumulative, 
+                  alpha = 0.75,
+                  type = "scatter",
+                  mode = "lines",
+                  hoverinfo = 'text',
+                  text = ~paste0("<span style='color:grey'>Count Active Chapters </span><b>",
+                                 cumulative,
+                                 "</b></br>",
+                                 "</br>",
+                                 "<span style='color:grey'>Date </span>",
+                                 First_Race_Date
+                                 )
+                  ) %>%
+        add_trace(x = ~First_Race_Date, y = ~count_start, name = "Newly Active Chapters",
+                  type = "bar",
+                  marker = list(color = "rgba(0, 0, 0, 0.85)"),
+                  text = ~paste0("<span style='color:grey'>Newly Active Chapters </span><b>",
+                                 count_start,
+                                 "</b></br>"
+                                 )
+                  ) %>%
+        layout(title = "",
+               paper_bgcolor = "transparent",
+               plot_bgcolor = "transparent",
+               margin = list(r = 20),
+               hoverlabel = list(font = list(color = "blue"),
+                                 bgcolor = "white",
+                                 bordercolor = "white"),
+               showlegend = FALSE,
+               xaxis = list(showgrid = FALSE,
+                            title = "",
+                            tickmode = "array",
+                            type = "marker",
+                            autorange = TRUE,
+                            tickfont = list(family = "serif", size = 10),
+                            ticks = "outside"
+                            ),
+               yaxis = list(showgrid = FALSE,
+                            range = c(0, max(chapter_count_df$cumulative)+5),
+                            title = "",
+                            tickmode = "array",
+                            type = "marker",
+                            tickfont = list(family = "serif", size = 10),
+                            ticks = "outside",
+                            zeroline = TRUE,
+                            zerolinecolor = toRGB("light grey")
+                            ),
+               annotations = list(
+                       list(xref = "x", yref = "y",
+                            x = ymd("2016-2-15"),
+                            y = max(chapter_count_df$cumulative)-5,
+                            text = "<b>MultiGP Drone Racing </b><br> Running Total Active Chapters",
+                            showarrow = FALSE,
+                            align = "left")
+               )
+        )
+
+
 # Subset to individual chapters
 # Don't forget chapter_race df
 chapter_df <- race_results %>%
@@ -176,6 +240,7 @@ plot_ly(chapter_df, x = ~Date.Recorded, color = I(~Course),
                hoverlabel = list(font = list(color = "blue"),
                                  bgcolor = "white",
                                  bordercolor = "white"),
+               showlegend = FALSE,
                xaxis = list(showgrid = FALSE,
                             title = "",
                             tickmode = "array",

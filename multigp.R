@@ -120,22 +120,33 @@ chapter_count_df$cumulative <- cumsum(chapter_count_df$count_start)
 
 # What is the first race most chapters participat in?
 
+#### Pilot Data Frame
+pilot_summary_df <- race_results %>%
+        group_by(Pilot.Handle, Full.Name) %>%
+        summarize(Races = length(Time),
+                  Unique_Tracks_Raced = length(unique(as.character(Course))),
+                  date = min(Date.Recorded),
+                  Last_Race_Date = max(Date.Recorded)
+        )
+pilot_summary_df$duration_active_days <- as.numeric(pilot_summary_df$Last_Race_Date-pilot_summary_df$date)+1
+
+# What is the distribution of races by pilot?
 
 
 ### Check this dataframe to see if still needed
-chapter_race_df <- race_results %>%
-        group_by(Chapter, year, month, Course) %>%
-        summarize(Races = length(Time),
-                  Min_Time = min(Time),
-                  Max_Time = max(Time),
-                  Mean_Time = mean(Time),
-                  Median_Time = median(Time),
-                  SD_Time = sd(Time))
-
-chapter_race_df$date <- ymd(paste0(chapter_race_df$year, "-",
-                                   chapter_race_df$month, "-",
-                                   "1")
-                            )
+# chapter_race_df <- race_results %>%
+#         group_by(Chapter, year, month, Course) %>%
+#         summarize(Races = length(Time),
+#                   Min_Time = min(Time),
+#                   Max_Time = max(Time),
+#                   Mean_Time = mean(Time),
+#                   Median_Time = median(Time),
+#                   SD_Time = sd(Time))
+# 
+# chapter_race_df$date <- ymd(paste0(chapter_race_df$year, "-",
+#                                    chapter_race_df$month, "-",
+#                                    "1")
+#                             )
 
 # Add filler dates
 df_time <- data.frame(date = seq(min(race_results$Date.Recorded), 

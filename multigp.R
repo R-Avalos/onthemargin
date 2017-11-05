@@ -128,7 +128,19 @@ pilot_summary_df <- race_results %>%
                   date = min(Date.Recorded),
                   Last_Race_Date = max(Date.Recorded)
         )
-pilot_summary_df$duration_active_days <- as.numeric(pilot_summary_df$Last_Race_Date-pilot_summary_df$date)+1
+pilot_summary_df$duration_active_days <- as.numeric(max(pilot_summary_df$date)-pilot_summary_df$date)+1
+pilot_summary_df$duration_first_last <- as.numeric(pilot_summary_df$Last_Race_Date-pilot_summary_df$date)+1
+
+
+pilot_count_df <- pilot_summary_df %>%
+        group_by(date) %>%
+        summarize(count_start = n())
+pilot_count_df <- merge(x = df_time, y = pilot_count_df, by = "date", all.x =T)
+pilot_count_df[is.na(pilot_count_df)] <- 0
+
+pilot_count_df$cumulative <- cumsum(pilot_count_df$count_start)
+plot(pilot_count_df$date, pilot_count_df$cumulative)
+summary(pilot_count_df)
 
 # What is the distribution of races by pilot?
 

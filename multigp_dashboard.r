@@ -1,11 +1,14 @@
-# Test Dashabord light framework
+##############################
+####  MultiGP Dashboard  ####
+############################
+
 library(shiny)
 library(DT)
 library(shinydashboard)
 library(gridExtra)
 
+## Dashboard
 
-#### Dashboard User Inferface ####
 ui <- dashboardPage(
         skin = "green",
         dashboardHeader(title = "MultiGP Drone Racing"),
@@ -15,20 +18,20 @@ ui <- dashboardPage(
                                  tabName= "allcourses"),
                         menuItem(text = "Chapters", 
                                  tabName = "chapters"
-                                 ),
+                        ),
                         menuItem(text = "Pilots",
                                  tabName = "pilots"
-                                 ),
+                        ),
                         menuItem(text = "Course Time Distribution",
                                  tabName = "course_t_distribution"
-                                 ),
+                        ),
                         menuItem(text = "Data",
                                  tabName = "data_table")
-                        )
-                ),
+                )
+        ),
         dashboardBody(
                 tabItems(
-#### All Courses Tab ####
+                        #### All Courses Tab ####
                         tabItem(tabName = "allcourses",
                                 fluidRow(
                                         column(
@@ -73,7 +76,7 @@ ui <- dashboardPage(
                                         column(
                                                 width = 6,
                                                 HTML(paste0("<p align = 'left'><span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(active_pilots$Pilot.Handle[1],
-                                                                                                                                        big.mark = ","), 
+                                                                                                                                                          big.mark = ","), 
                                                             "</strong></span>",
                                                             "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
                                                             " Most Active Pilot (",
@@ -84,7 +87,7 @@ ui <- dashboardPage(
                                         column(
                                                 width = 6,
                                                 HTML(paste0("<p align = 'left'><span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(active_chapters$Chapter[1],
-                                                                                                                                        big.mark = ","), 
+                                                                                                                                                          big.mark = ","), 
                                                             "</strong></span>",
                                                             "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
                                                             " Most Active Chapter (",
@@ -97,7 +100,7 @@ ui <- dashboardPage(
                                         plotlyOutput(outputId = "allcourse_plot")
                                 )
                         ),
-#### Chapters Tab ####
+                        #### Chapters Tab ####
                         tabItem(tabName = "chapters",
                                 fluidRow(
                                         column(
@@ -140,9 +143,9 @@ ui <- dashboardPage(
                                             selected = active_chapters$Chapter[active_chapters$Races == max(active_chapters$Races)]),
                                 plotlyOutput(outputId = "chapter_plot"),
                                 DT::dataTableOutput(outputId = "chp_table")
-                                ),
-##### Pilots Tab ####
-                                tabItem(tabName = "pilots",
+                        ),
+                        ##### Pilots Tab ####
+                        tabItem(tabName = "pilots",
                                 fluidRow(
                                         column(
                                                 width = 3,
@@ -158,17 +161,17 @@ ui <- dashboardPage(
                                                             "</strong></span>",
                                                             "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
                                                             " Avg Race Count</span>"
-                                                            )
-                                                     )
-                                                ),
+                                                )
+                                                )
+                                        ),
                                         column(
                                                 width = 3,
                                                 HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(round(mean(pilot_summary_df$duration_active_days),2), big.mark = ","), 
                                                             "</strong></span>",
                                                             "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
                                                             " Avg Days Active</span>")
-                                                     )
-                                                ),
+                                                )
+                                        ),
                                         column(
                                                 width = 3,
                                                 HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(round(mean(pilot_count_df$count_start),2), big.mark = ","), 
@@ -181,26 +184,26 @@ ui <- dashboardPage(
                                 plotlyOutput(outputId = "pilot_count"),
                                 DT::dataTableOutput(outputId = "pilot_table")
                         ),
-##### Course Time Distribution Tab ####
-
+                        ##### Course Time Distribution Tab ####
+                        
                         tabItem(tabName = "course_t_distribution",
                                 selectInput(inputId = "course_top5", 
                                             label = "Select Course", 
                                             choices = unique(top5_results$Course), 
                                             selected = "Utt1"),
                                 plotOutput("test")
-                                ),
-##### All Data Tab ####
+                        ),
+                        ##### All Data Tab ####
                         tabItem(tabName = "data_table",
                                 h2("All Race Results"),
                                 dataTableOutput(outputId = "course_select_table")
-                                )
+                        )
                 )
         )
 )
 
 
-#### Server #####
+
 server <- function(input,output){
         output$allcourse_plot <- renderPlotly({
                 plot_ly(race_results, x = ~Date.Recorded, y = ~Time, color = ~Course,
@@ -234,7 +237,7 @@ server <- function(input,output){
                                             type = "marker",
                                             range = c(min(race_results$Date.Recorded)-30,
                                                       max(race_results$Date.Recorded)
-                                                      ),
+                                            ),
                                             autorange = FALSE,
                                             tickfont = list(family = "serif", size = 10), 
                                             ticks = "outside"
@@ -263,13 +266,13 @@ server <- function(input,output){
                         )
                 
         })
-
-#### Data Table #### 
+        
+        #### Data Table #### 
         output$course_select_table <- DT::renderDataTable({race_results_sub},
                                                           rownames = FALSE,
                                                           escape = FALSE)
         
-#### Chapter Tab ####
+        #### Chapter Tab ####
         output$chp_count <- renderPlotly({
                 plot_ly(chapter_count_df) %>%
                         add_trace(x = ~date, y = ~cumulative, 
@@ -327,14 +330,14 @@ server <- function(input,output){
                                             align = "left")
                                )
                         )
-                })
+        })
         output$chp_table <- DT::renderDataTable({chapter_summary_df},
                                                 rownames = FALSE,
                                                 escape = FALSE,
                                                 options = list(lengthMenu = c(5, 30, 50), 
                                                                pageLength = 5,
                                                                order = list(list(2, 'desc')))
-                                                )
+        )
         ### Reactive Chapter Plot
         chapter_df <- reactive({
                 race_results %>% filter(Chapter == input$chapter_select)
@@ -417,7 +420,7 @@ server <- function(input,output){
         })
         
         
-#### Pilots Tab ####
+        #### Pilots Tab ####
         output$pilot_count <- renderPlotly({
                 plot_ly(pilot_count_df) %>%
                         add_trace(x = ~date, y = ~cumulative, 
@@ -477,13 +480,16 @@ server <- function(input,output){
                         )
         })
         output$pilot_table <- DT::renderDataTable({pilot_summary_df},
-                                                rownames = FALSE,
-                                                escape = FALSE,
-                                                options = list(lengthMenu = c(5, 30, 50), 
-                                                               pageLength = 5,
-                                                               order = list(list(2, 'desc')))
-                                                )
-#### Course Time Tab #### 
+                                                  rownames = FALSE,
+                                                  escape = FALSE,
+                                                  options = list(lengthMenu = c(5, 30, 50), 
+                                                                 pageLength = 5,
+                                                                 order = list(list(2, 'desc')))
+        )
+        
+        
+        
+        #### Course Time Tab #### 
         ### Reactive Density Plot with Table Overlay
         top5_data <- reactive({
                 top5_results %>% filter(Course == input$course_top5)

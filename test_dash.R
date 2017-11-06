@@ -197,7 +197,8 @@ ui <- dashboardPage(
                                                 )
                                         )
                                 ),
-                                plotlyOutput(outputId = "pilot_count")
+                                plotlyOutput(outputId = "pilot_count"),
+                                DT::dataTableOutput(outputId = "pilot_table")
                         ),
 ##### Bessel Tab Test ####
                         tabItem(tabName = "bessel_table",
@@ -409,7 +410,14 @@ server <- function(input,output){
                                )
                         )
         })
-        
+        output$pilot_table <- DT::renderDataTable({pilot_summary_df},
+                                                rownames = FALSE,
+                                                escape = FALSE,
+                                                options = list(lengthMenu = c(5, 30, 50), 
+                                                               pageLength = 5,
+                                                               order = list(list(2, 'desc')))
+                                                )
+
 # Bessel Tab #####
         output$bessel_run_plot <- renderPlotly({
                 plot_ly(bessel_run, x = ~Date.Recorded, y = ~Time,

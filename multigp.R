@@ -142,6 +142,7 @@ pilot_count_df$cumulative <- cumsum(pilot_count_df$count_start)
 plot(pilot_count_df$date, pilot_count_df$cumulative)
 summary(pilot_count_df)
 
+
 # What is the distribution of races by pilot?
 
 
@@ -184,13 +185,13 @@ display.brewer.all(5)
 ### Chapter Plots
 ggplot(chapter_count_df, aes(x = date, y = cumulative)) +
         geom_line()
-plot_ly(chapter_count_df) %>%
+plot_ly(pilot_count_df) %>%
         add_trace(x = ~date, y = ~cumulative, 
                   type = "scatter",
                   mode = "lines",
-                  line = list(color = "grey"),
+                  line = list(color = "blue"),
                   hoverinfo = 'text',
-                  text = ~paste0("<span style='color:grey'>Count Active Chapters </span><b>",
+                  text = ~paste0("<span style='color:grey'>Count Active Pilots </span><b>",
                                  cumulative,
                                  "</b></br>",
                                  "</br>",
@@ -198,10 +199,10 @@ plot_ly(chapter_count_df) %>%
                                  date
                                  )
                   ) %>%
-        add_trace(x = ~date, y = ~count_start, name = "Newly Active Chapters",
+        add_trace(x = ~date, y = ~count_start, name = "Newly Active Pilots",
                   type = "bar",
                   marker = list(color = "black"),
-                  text = ~paste0("<span style='color:grey'>Newly Active Chapters </span><b>",
+                  text = ~paste0("<span style='color:grey'>Newly Active Pilots </span><b>",
                                  count_start,
                                  "</b></br>"
                                  )
@@ -223,7 +224,7 @@ plot_ly(chapter_count_df) %>%
                             ticks = "outside"
                             ),
                yaxis = list(showgrid = FALSE,
-                            range = c(0, max(chapter_count_df$cumulative)+5),
+                            range = c(0, max(pilot_count_df$cumulative)+100),
                             title = "",
                             tickmode = "array",
                             type = "marker",
@@ -234,8 +235,8 @@ plot_ly(chapter_count_df) %>%
                annotations = list(
                        list(xref = "x", yref = "y",
                             x = ymd("2016-2-15"),
-                            y = max(chapter_count_df$cumulative)-5,
-                            text = "<b>MultiGP Drone Racing </b><br> Running Total Active Chapters",
+                            y = max(pilot_count_df$cumulative)-5,
+                            text = "<b>MultiGP Drone Racing </b><br> Running Total: Active <span style='font color:blue'>Pilots</span>",
                             showarrow = FALSE,
                             align = "left")
                )

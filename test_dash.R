@@ -36,6 +36,9 @@ ui <- dashboardPage(
                         menuItem(text = "Chapters", 
                                  tabName = "chapters"
                                  ),
+                        menuItem(text = "Pilots",
+                                 tabName = "pilots"
+                                 ),
                         menuItem(text = "Bessel Table",
                                  tabName = "bessel_table"),
                         menuItem(text = "Test",
@@ -44,10 +47,9 @@ ui <- dashboardPage(
                 ),
         dashboardBody(
                 tabItems(
+#### All Courses Tab ####
                         tabItem(tabName = "allcourses",
-# HTML summary data ####
                                 fluidRow(
-######
                                         column(
                                                 width = 3,
                                                 HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(summary_df$Active_Pilots,
@@ -85,9 +87,8 @@ ui <- dashboardPage(
                                                 )
                                         )
                                 ),
-# HTML summary data ####
+                                ### Summary Row
                                 fluidRow(
-######
                                         column(
                                                 width = 6,
                                                 HTML(paste0("<p align = 'left'><span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(active_pilots$Pilot.Handle[1],
@@ -111,15 +112,13 @@ ui <- dashboardPage(
                                                 )
                                         )
                                 ),
-#######
                                 fluidRow(
                                         plotlyOutput(outputId = "allcourse_plot")
-                                        #plotOutput$allcourse_plot
                                 )
                         ),
+#### Chapters Tab ####
                         tabItem(tabName = "chapters",
                                 fluidRow(
-                                        ######
                                         column(
                                                 width = 3,
                                                 HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(nrow(chapter_summary_df), big.mark = ","), 
@@ -161,11 +160,53 @@ ui <- dashboardPage(
                                 plotlyOutput(outputId = "chapter_plot"),
                                 DT::dataTableOutput(outputId = "chp_table")
                                 ),
+##### Pilots Tab ####
+                                tabItem(tabName = "pilots",
+                                fluidRow(
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(nrow(pilot_summary_df), big.mark = ","), 
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Active</span>")
+                                                )
+                                        ),
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(round(mean(pilot_summary_df$Races),2), big.mark = ","),
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Avg Race Count</span>"
+                                                            )
+                                                     )
+                                                ),
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(round(mean(pilot_summary_df$duration_active_days),2), big.mark = ","), 
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Avg Days Active</span>")
+                                                     )
+                                                ),
+                                        column(
+                                                width = 3,
+                                                HTML(paste0("<span style='font-family:Gill Sans; font-size:20px;'> <strong>", prettyNum(round(mean(pilot_count_df$count_start),2), big.mark = ","), 
+                                                            "</strong></span>",
+                                                            "<span style='font-family:Gill Sans; font-size:12px; color:grey;'>", 
+                                                            " Avg New Pilots/Day</span>")
+                                                )
+                                        )
+                                ),
+                                plotlyOutput(outputId = "pilot_count")
+                        ),
+##### Bessel Tab Test ####
                         tabItem(tabName = "bessel_table",
                                 h2("Bessel Run, Table of Results"),
                                 
                                 dataTableOutput(outputId = "bessel_table")
                                 ),
+##### Test Tab ####
+
                         tabItem(tabName = "test",
                                 "test",
                                 selectInput(inputId = "course_top5", label = "Course", choices = unique(top5_results$Course), selected = "Utt1"),
@@ -242,13 +283,13 @@ server <- function(input,output){
                 
         })
         
-# Chapter Tab
+#### Chapter Tab ####
         output$chp_count <- renderPlotly({
                 plot_ly(chapter_count_df) %>%
                         add_trace(x = ~date, y = ~cumulative, 
                                   type = "scatter",
                                   mode = "lines",
-                                  line = list(color = "grey"),
+                                  line = list(color = "red"),
                                   hoverinfo = 'text',
                                   text = ~paste0("<span style='color:grey'>Count Active Chapters </span><b>",
                                                  cumulative,
@@ -295,7 +336,7 @@ server <- function(input,output){
                                        list(xref = "x", yref = "y",
                                             x = ymd("2016-2-15"),
                                             y = max(chapter_count_df$cumulative)-5,
-                                            text = "<b>MultiGP Drone Racing </b><br> Running Total, Active Chapters",
+                                            text = "<b>MultiGP Drone Racing </b><br> Running Total, Active <span style='color:red;'><b>Chapters</b></span>",
                                             showarrow = FALSE,
                                             align = "left")
                                )
@@ -309,7 +350,67 @@ server <- function(input,output){
                                                                order = list(list(2, 'desc')))
                                                 )
 
-# Bessel Tab
+#### Pilots Tab ####
+        output$pilot_count <- renderPlotly({
+                plot_ly(pilot_count_df) %>%
+                        add_trace(x = ~date, y = ~cumulative, 
+                                  type = "scatter",
+                                  mode = "lines",
+                                  line = list(color = "blue"),
+                                  hoverinfo = 'text',
+                                  text = ~paste0("<span style='color:grey'>Count Active Pilots </span><b>",
+                                                 cumulative,
+                                                 "</b></br>",
+                                                 "</br>",
+                                                 "<span style='color:grey'>Date </span>",
+                                                 date
+                                  )
+                        ) %>%
+                        add_trace(x = ~date, y = ~count_start, name = "Newly Active Pilots",
+                                  type = "bar",
+                                  marker = list(color = "black"),
+                                  text = ~paste0("<span style='color:grey'>Newly Active Pilots </span><b>",
+                                                 count_start,
+                                                 "</b></br>"
+                                  )
+                        ) %>%
+                        layout(title = "",
+                               paper_bgcolor = "transparent",
+                               plot_bgcolor = "transparent",
+                               margin = list(r = 20),
+                               hoverlabel = list(font = list(color = "blue"),
+                                                 bgcolor = "white",
+                                                 bordercolor = "white"),
+                               showlegend = FALSE,
+                               xaxis = list(showgrid = FALSE,
+                                            title = "",
+                                            tickmode = "array",
+                                            type = "marker",
+                                            autorange = TRUE,
+                                            tickfont = list(family = "serif", size = 10),
+                                            ticks = "outside"
+                               ),
+                               yaxis = list(showgrid = FALSE,
+                                            range = c(0, max(pilot_count_df$cumulative)+100),
+                                            title = "",
+                                            tickmode = "array",
+                                            type = "marker",
+                                            tickfont = list(family = "serif", size = 10),
+                                            ticks = "outside",
+                                            zeroline = FALSE
+                               ),
+                               annotations = list(
+                                       list(xref = "x", yref = "y",
+                                            x = ymd("2016-2-15"),
+                                            y = max(pilot_count_df$cumulative)-5,
+                                            text = "<b>MultiGP Drone Racing </b><br> Running Total: Active <span style='color:blue;'><b>Pilots</b></span>",
+                                            showarrow = FALSE,
+                                            align = "left")
+                               )
+                        )
+        })
+        
+# Bessel Tab #####
         output$bessel_run_plot <- renderPlotly({
                 plot_ly(bessel_run, x = ~Date.Recorded, y = ~Time,
                         name = "Recorded Race Time",

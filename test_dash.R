@@ -9,9 +9,9 @@ library(gridExtra)
 #         sprintf('<a href="https://www.google.com/#q=%s" target="_blank" class="btn btn-primary">Info</a>',val)
 # } # google search
 
-createLink <- function(link, reference) {
-        paste0('<a href=', link, ">", reference, "</a>")
-} # pilot link
+# createLink <- function(link, reference) {
+#         paste0('<a href=', link, ">", reference, "</a>")
+# } # pilot link
 # apply(test_df, MARGIN = 1, FUN = function(x) createLink(x['Pilot_link'], x['Pilot.Handle']))
 # test_df$url_link <- apply(test_df, MARGIN = 1, FUN = function(x) createLink(x['Pilot_link'], x['Pilot.Handle']))
 # 
@@ -31,7 +31,7 @@ ui <- dashboardPage(
         dashboardHeader(title = "MultiGP Drone Racing"),
         dashboardSidebar(
                 sidebarMenu(
-                        menuItem(text = "All Courses",
+                        menuItem(text = "MultiGP League Overview",
                                  tabName= "allcourses"),
                         menuItem(text = "Chapters", 
                                  tabName = "chapters"
@@ -39,10 +39,11 @@ ui <- dashboardPage(
                         menuItem(text = "Pilots",
                                  tabName = "pilots"
                                  ),
-                        menuItem(text = "Bessel Table",
-                                 tabName = "bessel_table"),
                         menuItem(text = "Course Time Distribution",
-                                 tabName = "course_t_distribution")
+                                 tabName = "course_t_distribution"
+                                 ),
+                        menuItem(text = "Data",
+                                 tabName = "data_table")
                         )
                 ),
         dashboardBody(
@@ -200,16 +201,7 @@ ui <- dashboardPage(
                                 plotlyOutput(outputId = "pilot_count"),
                                 DT::dataTableOutput(outputId = "pilot_table")
                         ),
-##### Bessel Tab Test ####
-                        tabItem(tabName = "bessel_table",
-                                h2("Bessel Run, Table of Results"),
-                                selectInput(inputId = "course_select", 
-                                            label = "Select Course",
-                                            choices = unique(race_results$Course),
-                                            selected = "Utt1"),
-                                dataTableOutput(outputId = "course_select_table")
-                                ),
-##### Test Tab ####
+##### Course Time Distribution Tab ####
 
                         tabItem(tabName = "course_t_distribution",
                                 selectInput(inputId = "course_top5", 
@@ -217,6 +209,11 @@ ui <- dashboardPage(
                                             choices = unique(top5_results$Course), 
                                             selected = "Utt1"),
                                 plotOutput("test")
+                                ),
+##### All Data Tab ####
+                        tabItem(tabName = "data_table",
+                                h2("All Race Results"),
+                                dataTableOutput(outputId = "course_select_table")
                                 )
                 )
         )
@@ -286,13 +283,11 @@ server <- function(input,output){
                         )
                 
         })
-        
-        course_select_results <- reactive({
-                race_results %>% filter(Chapter == input$course_select)
-        })
-        output$course_select_table <- renderDataTable(
-                {df <- course_select_results()
-                dt <- DT::datatable(df)}, dt, escape = FALSE)
+
+#### Data Table #### 
+        output$course_select_table <- DT::renderDataTable({race_results_sub},
+                                                          rownames = FALSE,
+                                                          escape = FALSE)
         
 #### Chapter Tab ####
         output$chp_count <- renderPlotly({

@@ -7,68 +7,10 @@ library(ggthemes)
 library(plotly)
 library(RColorBrewer)
 
-# Create Function
+# Create Functions
 createLink <- function(link, reference) {
         paste0('<a href=', link, ">", reference, "</a>")
 }
-
-# Load and Trasnsform Data
-race_results <- read.csv(file = "multigp_course_times.csv", header = T, stringsAsFactors = F)
-race_results$Date.Recorded <- mdy(race_results$Date.Recorded)
-race_results$Pilot_link <- paste0("https://www.multigp.com/pilots/view/?pilot=", 
-                                  race_results$Pilot.Handle) #create link to pilot site
-race_results$Pilot_link <- str_replace_all(race_results$Pilot_link, pattern = " ", replacement = "") #remove spaces from url link
-race_results$Course <- as.factor(race_results$Course)
-race_results$Chapter <- as.factor(race_results$Chapter)
-race_results <- race_results %>%
-        filter(Date.Recorded > ymd("2015-1-1")) #remove misrecorded data
-race_results$year <- year(race_results$Date.Recorded)
-race_results$month <- month(race_results$Date.Recorded)
-race_results$pilot_url <- apply(race_results, MARGIN = 1, FUN = function(x) createLink(x['Pilot_link'], x['Pilot.Handle'])) #Create clickable linke
-
-
-### Subset ####
-##############
-
-
-# Summary data frames
-summary_df <- race_results %>%
-        summarise(Course_Count = n_distinct(Course),
-                  Active_Chapter_Count = n_distinct(Chapter),
-                  Active_Pilots = n_distinct(Pilot.Handle),
-                  Count_Races = n()
-                  )
-
-summary_df
-
-active_pilots <- race_results %>%
-        group_by(Pilot.Handle) %>%
-        summarise(Races = n()) %>%
-        arrange(desc(Races))
-
-active_chapters <- race_results %>%
-        group_by(Chapter) %>%
-        summarise(Races = n()) %>%
-        arrange(desc(Races))
-
-
-
-
-# Subset to unique courses
-bessel_results <- race_results %>% filter(Course == "Bessel Run")
-bessel_run <- race_results %>% filter(Course == "Bessel Run")
-fury <- race_results %>% filter(Course == "Fury")
-high_voltage <- race_results %>% filter(Course == "High Voltage")
-nautilus <- race_results %>% filter(Course == "Nautilus")
-tsunami <- race_results %>% filter(Course == "Tsunami")
-utt1 <- race_results %>% filter(Course == "UTT1")
-
-
-# Order results by fastest
-#### Fury Top 5
-# Function to return top 5 and average into table, order fast-slow with mean avg at end.
-
-### Top 5 Pilots by COurse, Data Frame
 func_top5 <- function(race_data = race_results, course_name) {
         top5 <- race_data %>%
                 filter(Rank < 6 & Course == course_name) %>%
@@ -84,6 +26,63 @@ func_top5 <- function(race_data = race_results, course_name) {
         print(top5)
         return(top5)
 }
+
+
+
+# Load and Trasnsform Data
+race_results <- read.csv(file = "multigp_course_times.csv", header = T, stringsAsFactors = F)
+race_results$Date.Recorded <- mdy(race_results$Date.Recorded)
+race_results$Pilot_link <- paste0("https://www.multigp.com/pilots/view/?pilot=", 
+                                  race_results$Pilot.Handle) #create link to pilot site
+race_results$Pilot_link <- str_replace_all(race_results$Pilot_link, pattern = " ", replacement = "") #remove spaces from url link
+race_results$Course <- as.factor(race_results$Course)
+race_results$Chapter <- as.factor(race_results$Chapter)
+race_results <- race_results %>%
+        filter(Date.Recorded > ymd("2015-1-1")) #remove misrecorded data
+race_results$year <- year(race_results$Date.Recorded)
+race_results$month <- month(race_results$Date.Recorded)
+race_results$pilot_url <- apply(race_results, MARGIN = 1, FUN = function(x) createLink(x['Pilot_link'], x['Pilot.Handle'])) #Create clickable link
+
+race_results_sub <- race_results %>% select(Rank, Pilot.Handle, Full.Name, Chapter, Time, Date.Recorded, Course, pilot_url)
+
+### Subset ####
+##############
+
+
+# Summary data frames
+summary_df <- race_results %>%
+        summarise(Course_Count = n_distinct(Course),
+                  Active_Chapter_Count = n_distinct(Chapter),
+                  Active_Pilots = n_distinct(Pilot.Handle),
+                  Count_Races = n()
+                  )
+active_pilots <- race_results %>%
+        group_by(Pilot.Handle) %>%
+        summarise(Races = n()) %>%
+        arrange(desc(Races))
+
+active_chapters <- race_results %>%
+        group_by(Chapter) %>%
+        summarise(Races = n()) %>%
+        arrange(desc(Races))
+
+
+
+# Subset to unique courses
+# bessel_results <- race_results %>% filter(Course == "Bessel Run")
+# bessel_run <- race_results %>% filter(Course == "Bessel Run")
+# fury <- race_results %>% filter(Course == "Fury")
+# high_voltage <- race_results %>% filter(Course == "High Voltage")
+# nautilus <- race_results %>% filter(Course == "Nautilus")
+# tsunami <- race_results %>% filter(Course == "Tsunami")
+# utt1 <- race_results %>% filter(Course == "UTT1")
+
+
+# Order results by fastest
+#### Fury Top 5
+# Function to return top 5 and average into table, order fast-slow with mean avg at end.
+
+### Top 5 Pilots by COurse, Data Frame
 bessel_top5 <- func_top5(race_data = race_results, course_name = "Bessel Run")
 fury_top5 <- func_top5(race_data = race_results, course_name = "Fury")
 high_top5 <- func_top5(race_data = race_results, course_name = "High Voltage")
@@ -92,6 +91,7 @@ tsunami_top5 <- func_top5(race_data = race_results, course_name = "Tsunami")
 utt1_top5 <- func_top5(race_data = race_results, course_name = "UTT1")
 top5_results <- rbind(bessel_top5, fury_top5, high_top5, nautilus_top5, tsunami_top5, utt1_top5)
 
+remove(bessel_top5, high_top5, nautilus_top5, utt1_top5)
 
 ### Chapter Data ###
 ###################
@@ -113,13 +113,10 @@ df_time <- data.frame(date = seq(min(race_results$Date.Recorded),
                                  by="day"))
 
 chapter_count_df <- chapter_summary_df %>%
-        group_by(First_Race_Date) %>%
+        group_by(date) %>%
         summarize(count_start = n())
-colnames(chapter_count_df)[1] <- "date"
-
 chapter_count_df <- merge(x = df_time, y = chapter_count_df, by = "date", all.x =T)
 chapter_count_df[is.na(chapter_count_df)] <- 0
-
 chapter_count_df$cumulative <- cumsum(chapter_count_df$count_start)
 
 # What is the first race most chapters participat in?
@@ -143,9 +140,7 @@ pilot_count_df <- pilot_summary_df %>%
 colnames(pilot_count_df)[1] <- "date"
 pilot_count_df <- merge(x = df_time, y = pilot_count_df, by = "date", all.x =T)
 pilot_count_df[is.na(pilot_count_df)] <- 0
-
 pilot_count_df$cumulative <- cumsum(pilot_count_df$count_start)
-plot(pilot_count_df$date, pilot_count_df$cumulative)
 
 
 # What is the distribution of races by pilot?
@@ -167,11 +162,7 @@ plot(pilot_count_df$date, pilot_count_df$cumulative)
 #                             )
 
 # Add filler dates
-df_time <- data.frame(date = seq(min(race_results$Date.Recorded), 
-                                max(race_results$Date.Recorded), 
-                                by="day"))
-summary(df_time)
-chapter_race_df <- merge(x=df_time, y=chapter_race_df, by="date", all.x=T)
+# chapter_race_df <- merge(x=df_time, y=chapter_race_df, by="date", all.x=T)
 
 # Selection string for plot input
 chapter_choice <- active_chapters[with(active_chapters, order(Chapter)),]
@@ -181,7 +172,6 @@ chapter_choice <- chapter_choice$Chapter
 
 #### Test plots  ###
 ###################
-display.brewer.all(5)
 
 
 # Pilot plots

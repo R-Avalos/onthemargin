@@ -41,8 +41,8 @@ ui <- dashboardPage(
                                  ),
                         menuItem(text = "Bessel Table",
                                  tabName = "bessel_table"),
-                        menuItem(text = "Test",
-                                 tabName = "test")
+                        menuItem(text = "Course Time Distribution",
+                                 tabName = "course_t_distribution")
                         )
                 ),
         dashboardBody(
@@ -203,14 +203,19 @@ ui <- dashboardPage(
 ##### Bessel Tab Test ####
                         tabItem(tabName = "bessel_table",
                                 h2("Bessel Run, Table of Results"),
-                                
-                                dataTableOutput(outputId = "bessel_table")
+                                selectInput(inputId = "course_select", 
+                                            label = "Select Course",
+                                            choices = unique(race_results$Course),
+                                            selected = "Utt1"),
+                                dataTableOutput(outputId = "course_select_table")
                                 ),
 ##### Test Tab ####
 
-                        tabItem(tabName = "test",
-                                "test",
-                                selectInput(inputId = "course_top5", label = "Course", choices = unique(top5_results$Course), selected = "Utt1"),
+                        tabItem(tabName = "course_t_distribution",
+                                selectInput(inputId = "course_top5", 
+                                            label = "Select Course", 
+                                            choices = unique(top5_results$Course), 
+                                            selected = "Utt1"),
                                 plotOutput("test")
                                 )
                 )
@@ -220,8 +225,6 @@ ui <- dashboardPage(
 
 
 server <- function(input,output){
-        output$bessel_table <- renderDataTable({bessel_results}, escape = FALSE)
-        
         output$allcourse_plot <- renderPlotly({
                 plot_ly(race_results, x = ~Date.Recorded, y = ~Time, color = ~Course,
                         opacity = 0.75,
@@ -283,6 +286,13 @@ server <- function(input,output){
                         )
                 
         })
+        
+        course_select_results <- reactive({
+                race_results %>% filter(Chapter == input$course_select)
+        })
+        output$course_select_table <- renderDataTable(
+                {df <- course_select_results()
+                dt <- DT::datatable(df)}, dt, escape = FALSE)
         
 #### Chapter Tab ####
         output$chp_count <- renderPlotly({
@@ -350,7 +360,88 @@ server <- function(input,output){
                                                                pageLength = 5,
                                                                order = list(list(2, 'desc')))
                                                 )
-
+        ### Reactive Chapter Plot
+        chapter_df <- reactive({
+                race_results %>% filter(Chapter == input$chapter_select)
+        })
+        output$chapter_plot <- renderPlotly({
+                
+                chapter_data <- chapter_df()
+                chap_plot <- plot_ly(chapter_data, x = ~Date.Recorded, color = I(~Course),
+                                     opacity = 0.75,
+                                     colors = brewer.pal(6, "Dark2"),
+                                     hoverinfo = 'text',
+                                     text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>",
+                                                    Pilot.Handle,
+                                                    "</b></br>",
+                                                    "</br><span style='color:grey'>Course </span>",
+                                                    Course,
+                                                    "</br><span style='color:grey'>Time </span>",
+                                                    Time,
+                                                    " secs")
+                ) %>%
+                        add_markers(y = ~Time) %>%
+                        add_lines(y = ~fitted(loess(Time ~ as.numeric(Date.Recorded))),
+                                  line = list(colors = "Set1"),
+                                  opacity = 0.5,
+                                  name = "Loess Smoother", showlegend = FALSE) %>%
+                        layout(title = "",
+                               paper_bgcolor = "transparent",
+                               plot_bgcolor = "transparent",
+                               margin = list(r = 20),
+                               hoverlabel = list(font = list(color = "blue"),
+                                                 bgcolor = "white",
+                                                 bordercolor = "white"),
+                               xaxis = list(showgrid = FALSE,
+                                            title = "",
+                                            tickmode = "array",
+                                            type = "marker",
+                                            range = c(min(race_results$Date.Recorded)-30,
+                                                      max(race_results$Date.Recorded)
+                                            ),
+                                            autorange = FALSE,
+                                            tickfont = list(family = "serif", size = 10),
+                                            ticks = "outside"
+                               ),
+                               yaxis = list(showgrid = FALSE,
+                                            range = c(0, max(race_results$Time)+5),
+                                            title = "",
+                                            tickmode = "array",
+                                            type = "marker",
+                                            tickvalues = summary(race_results$Time),
+                                            ticksuffix = " secs",
+                                            ticktext = round(summary(race_results$Time), 1),
+                                            tickfont = list(family = "serif", size = 10),
+                                            ticks = "outside",
+                                            zeroline = TRUE,
+                                            zerolinecolor = toRGB("light grey")
+                               ),
+                               annotations = list(
+                                       list(xref = "x", yref = "y",
+                                            x = ymd("2016-2-15"),
+                                            y = max(race_results$Time)-5,
+                                            text = paste0("<b><span style='color:blue'>",
+                                                          chapter_data$Chapter[1], 
+                                                          "</span></b><br>",
+                                                          "Individual Pilot Times by Course<br>",
+                                                          length(unique(chapter_data$Pilot.Handle)),
+                                                          " Active Pilots<br>"
+                                            ),
+                                            showarrow = FALSE,
+                                            align = "left")
+                               ),
+                               shapes=list(type='line',
+                                           x0= min(race_results$Date.Recorded-30),
+                                           x1= max(race_results$Date.Recorded),
+                                           y0= min(race_results$Time),
+                                           y1= min(race_results$Time),
+                                           line=list(dash='dot', width=1, color = "grey"))
+                        )
+                print(chap_plot)
+                
+        })
+        
+        
 #### Pilots Tab ####
         output$pilot_count <- renderPlotly({
                 plot_ly(pilot_count_df) %>%
@@ -418,197 +509,9 @@ server <- function(input,output){
                                                                order = list(list(2, 'desc')))
                                                 )
 
-# Bessel Tab #####
-        output$bessel_run_plot <- renderPlotly({
-                plot_ly(bessel_run, x = ~Date.Recorded, y = ~Time,
-                        name = "Recorded Race Time",
-                        type = "scatter",
-                        mode = "markers",
-                        hoverinfo = 'text',
-                        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>", 
-                                       Pilot.Handle, 
-                                       "</b></br>",
-                                       "</br>",
-                                       "<span style='color:grey'>Chapter </span>", 
-                                       Chapter,
-                                       "</br><span style='color:grey'>Time </span>", 
-                                       Time, 
-                                       "secs "),
-                        marker = list(color = 'rgb(0, 66, 37)', opacity = 0.4)
-                ) %>%
-                        add_trace(name = paste0("Mean Race Time ", round(mean(bessel_run$Time), digits = 2), " secs"), 
-                                  y = mean(bessel_run$Time), mode = "lines",
-                                  line = list(color = "red", opacity = 0.2),
-                                  marker = list(opacity = 0)
-                        ) %>%
-                        add_annotations(
-                                text = paste0("Mean Race Time: ", 
-                                              round(mean(bessel_run$Time), 2), 
-                                              " secs"),
-                                x = mean(bessel_run$Date.Recorded),
-                                y = mean(bessel_run$Time),
-                                yanchor = "bottom",
-                                showarrow = FALSE,
-                                font = list(color = "red")
-                        ) %>%
-                        layout(title = "Bessel Run Race Results",
-                               margin = list(l = 100),
-                               hoverlabel = list(font = list(color = "blue"),
-                                                 bgcolor = "#f6f6f6",
-                                                 bordercolor = "white"),
-                               xaxis = list(title = "Recorded Date"),
-                               showlegend = FALSE
-                        )
-                
-        })
-        output$fury_plot <- renderPlotly({
-                plot_ly(fury, x = ~Date.Recorded, y = ~Time,
-                        name = "Recorded Race Time",
-                        type = "scatter",
-                        mode = "markers",
-                        hoverinfo = 'text',
-                        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>", 
-                                       Pilot.Handle, 
-                                       "</b></br>",
-                                       "</br>",
-                                       "<span style='color:grey'>Chapter </span>", 
-                                       Chapter,
-                                       "</br><span style='color:grey'>Time </span>", 
-                                       Time, 
-                                       "secs "),
-                        marker = list(color = 'rgb(0, 66, 37)', opacity = 0.4)
-                ) %>%
-                        add_trace(name = paste0("Mean Race Time ", round(mean(fury$Time), digits = 2), " secs"), 
-                                  y = mean(fury$Time), mode = "lines",
-                                  line = list(color = "red", opacity = 0.2),
-                                  marker = list(opacity = 0)
-                        ) %>%
-                        add_annotations(
-                                text = paste0("Mean Race Time: ", 
-                                              round(mean(fury$Time), 2), 
-                                              " secs"),
-                                x = mean(fury$Date.Recorded),
-                                y = mean(fury$Time),
-                                yanchor = "bottom",
-                                showarrow = FALSE,
-                                font = list(color = "red")
-                        ) %>%
-                        layout(title = "Fury Race Results",
-                               margin = list(l = 100),
-                               hoverlabel = list(font = list(color = "blue"),
-                                                 bgcolor = "#f6f6f6",
-                                                 bordercolor = "white"),
-                               xaxis = list(title = "Recorded Date"),
-                               showlegend = FALSE
-                        )
-        })
-        output$fury_top5 <- renderTable(fury_top5, 
-                                        hover = TRUE,
-                                        spacing = "xs") # "fury_top5"
-        output$bessel_top5 <- renderTable(bessel_top5, 
-                                        hover = TRUE,
-                                        spacing = "xs")
-        output$high_top5 <- renderTable(high_top5, 
-                                          hover = TRUE,
-                                          spacing = "xs")
-        output$nautilus_top5 <- renderTable(nautilus_top5, 
-                                        hover = TRUE,
-                                        spacing = "xs")
-        output$fury_density <- renderPlotly({
-                ggplotly(
-                        ggplot(fury, aes(x = Time)) +
-                                stat_density(fill = "red", alpha = 0.2) +
-                                expand_limits(y = 0) +
-                                geom_vline(xintercept = mean(fury$Time), alpha = 0.5) +
-                                xlab("Fury Course Times (Seconds)") +
-                                theme_tufte()
-                ) %>%
-                        layout(annotations = fury_avg_text)
-        })
         
-        ### Reactive Chapter Plot
-        chapter_df <- reactive({
-                race_results %>% filter(Chapter == input$chapter_select)
-        })
-        
-        output$chapter_plot <- renderPlotly({
-                
-                chapter_data <- chapter_df()
-                chap_plot <- plot_ly(chapter_data, x = ~Date.Recorded, color = I(~Course),
-                        opacity = 0.75,
-                        colors = brewer.pal(6, "Dark2"),
-                        hoverinfo = 'text',
-                        text = ~paste0("<span style='color:grey'>Pilot Handle </span><b>",
-                                       Pilot.Handle,
-                                       "</b></br>",
-                                       "</br><span style='color:grey'>Course </span>",
-                                       Course,
-                                       "</br><span style='color:grey'>Time </span>",
-                                       Time,
-                                       " secs")
-                ) %>%
-                        add_markers(y = ~Time) %>%
-                        add_lines(y = ~fitted(loess(Time ~ as.numeric(Date.Recorded))),
-                                  line = list(colors = "Set1"),
-                                  opacity = 0.5,
-                                  name = "Loess Smoother", showlegend = FALSE) %>%
-                        layout(title = "",
-                               paper_bgcolor = "transparent",
-                               plot_bgcolor = "transparent",
-                               margin = list(r = 20),
-                               hoverlabel = list(font = list(color = "blue"),
-                                                 bgcolor = "white",
-                                                 bordercolor = "white"),
-                               xaxis = list(showgrid = FALSE,
-                                            title = "",
-                                            tickmode = "array",
-                                            type = "marker",
-                                            range = c(min(race_results$Date.Recorded)-30,
-                                                      max(race_results$Date.Recorded)
-                                            ),
-                                            autorange = FALSE,
-                                            tickfont = list(family = "serif", size = 10),
-                                            ticks = "outside"
-                               ),
-                               yaxis = list(showgrid = FALSE,
-                                            range = c(0, max(race_results$Time)+5),
-                                            title = "",
-                                            tickmode = "array",
-                                            type = "marker",
-                                            tickvalues = summary(race_results$Time),
-                                            ticksuffix = " secs",
-                                            ticktext = round(summary(race_results$Time), 1),
-                                            tickfont = list(family = "serif", size = 10),
-                                            ticks = "outside",
-                                            zeroline = TRUE,
-                                            zerolinecolor = toRGB("light grey")
-                               ),
-                               annotations = list(
-                                       list(xref = "x", yref = "y",
-                                            x = ymd("2016-2-15"),
-                                            y = max(race_results$Time)-5,
-                                            text = paste0("<b><span style='color:blue'>",
-                                                          chapter_data$Chapter[1], 
-                                                          "</span></b><br>",
-                                                          "Individual Pilot Times by Course<br>",
-                                                          length(unique(chapter_data$Pilot.Handle)),
-                                                          " Active Pilots<br>"
-                                            ),
-                                            showarrow = FALSE,
-                                            align = "left")
-                               ),
-                               shapes=list(type='line',
-                                           x0= min(race_results$Date.Recorded-30),
-                                           x1= max(race_results$Date.Recorded),
-                                           y0= min(race_results$Time),
-                                           y1= min(race_results$Time),
-                                           line=list(dash='dot', width=1, color = "grey"))
-                        )
-                print(chap_plot)
-                
-        })
-                
-        
+
+#### Course Time Tab #### 
         ### Reactive Density Plot with Table Overlay
         top5_data <- reactive({
                 top5_results %>% filter(Course == input$course_top5)

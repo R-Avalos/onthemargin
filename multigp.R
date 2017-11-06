@@ -134,8 +134,7 @@ pilot_summary_df <- race_results %>%
                   Last_Race_Date = max(Date.Recorded),
                   URL = pilot_url[1]
         )
-pilot_summary_df$duration_active_days <- as.numeric(max(pilot_summary_df$date)-pilot_summary_df$date)+1
-pilot_summary_df$duration_first_last <- as.numeric(pilot_summary_df$Last_Race_Date-pilot_summary_df$date)+1
+pilot_summary_df$duration_active_days <- as.numeric(pilot_summary_df$Last_Race_Date-pilot_summary_df$First_Race_Date)+1
 
 
 pilot_count_df <- pilot_summary_df %>%
